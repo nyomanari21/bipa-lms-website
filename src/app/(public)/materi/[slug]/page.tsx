@@ -129,13 +129,18 @@ export default function DetailMateriPage() {
         </div>
       )}
 
-      {/* Konten Materi (Render HTML WYSIWYG dari Supabase) */}
+      {/* Konten Materi (Render HTML Rich Text Editor dari Supabase) */}
       <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-10">
         <div 
-          className="prose max-w-none space-y-4 text-sm md:text-base leading-relaxed text-slate-700
-                     [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-slate-950 [&_h3]:mt-6
-                     [&_ul]:list-disc [&_ul]:pl-5 
-                     [&_blockquote]:border-l-4 [&_blockquote]:border-orange-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-slate-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg"
+          className="prose max-w-none text-sm md:text-base leading-relaxed text-slate-700
+                    [&_h1]:text-2xl [&_h1]:font-extrabold [&_h1]:text-slate-900 [&_h1]:mt-6 [&_h1]:mb-3
+                    [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h2]:mb-2.5
+                    [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2
+                    [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-3
+                    [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-3
+                    [&_li]:mb-1
+                    [&_img]:rounded-xl [&_img]:my-4 [&_img]:max-h-112.5 [&_img]:w-auto [&_img]:object-cover
+                    [&_blockquote]:border-l-4 [&_blockquote]:border-orange-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-slate-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg"
           dangerouslySetInnerHTML={{ __html: material.content_text }}
         />
       </div>

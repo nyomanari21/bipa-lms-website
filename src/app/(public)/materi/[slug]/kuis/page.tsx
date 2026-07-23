@@ -69,7 +69,7 @@ export default function KuisPage() {
           .from("questions")
           .select("id, question_text, question_type, options, correct_answer")
           .eq("quiz_id", activeQuizId)
-          .order("created_at", { ascending: true });
+          .order("question_number", { ascending: true });
 
         if (qError) {
           console.error("Gagal mengambil soal:", qError.message);

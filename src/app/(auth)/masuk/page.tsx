@@ -73,7 +73,7 @@ export default function Masuk() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
         <button
           className="cursor-pointer"
-          onClick={() => router.back()}
+          onClick={() => router.push('/')}
         >
           <div className="flex items-center gap-2 text-gray-500 text-sm hover:text-orange-400 transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="8" height="16" viewBox="0 0 12 24">
