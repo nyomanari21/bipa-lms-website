@@ -7,9 +7,9 @@ import MateriCard from "@/components/public/MateriCard";
 
 const bipaLevels = [
   { id: 1, name: "BIPA 1", theme: "Gastronomi Bandung", active: true },
-  { id: 2, name: "BIPA 2", theme: "🔒 Terkunci", active: false },
-  { id: 3, name: "BIPA 3", theme: "🔒 Terkunci", active: false },
-  { id: 4, name: "BIPA 4", theme: "🔒 Terkunci", active: false },
+  // { id: 2, name: "BIPA 2", theme: "🔒 Terkunci", active: false },
+  // { id: 3, name: "BIPA 3", theme: "🔒 Terkunci", active: false },
+  // { id: 4, name: "BIPA 4", theme: "🔒 Terkunci", active: false },
 ];
 
 // Definisikan tipe data sesuai kolom database
@@ -49,7 +49,7 @@ export default function MateriPage() {
     <div className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-10 bg-slate-50 text-slate-800">
       <div className="border-b border-slate-200 pb-6 mb-8">
         <h1 className="text-3xl font-extrabold text-slate-900">Materi Pembelajaran</h1>
-        <p className="text-sm text-slate-500 mt-1">Pilih tingkatan BIPA dan jelajahi modul belajar.</p>
+        <p className="text-sm text-slate-500 mt-1">Jelajahi modul belajar untuk tingkat BIPA 1.</p>
       </div>
 
       {/* Tabs */}

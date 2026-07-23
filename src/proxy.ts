@@ -34,12 +34,13 @@ export async function proxy(request: NextRequest) {
   // Ambil data user yang sedang aktif dari session
   const { data: { user } } = await supabase.auth.getUser()
 
-  // JIKA BELUM LOGIN: Tendang langsung ke halaman /masuk
+  const pathname = request.nextUrl.pathname;
+
+  // Jika belum login, lempar ke halaman /masuk
   if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/masuk'
-    // Opsional: berikan parameter ?next= agar setelah login bisa kembali ke halaman terakhir
-    url.searchParams.set('next', request.nextUrl.pathname) 
+    url.searchParams.set('next', pathname)
     return NextResponse.redirect(url)
   }
 
@@ -50,11 +51,26 @@ export async function proxy(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  // Blokir akses dan lempar ke halaman Beranda (/) atau /masuk jika bukan siswa
-  if (!profile || profile.role !== 'student') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/' // Atau ganti ke rute khusus /unauthorized jika ada
-    return NextResponse.redirect(url)
+  // Blokir akses ke halaman materi dan lempar ke halaman Beranda (/) jika bukan siswa
+  if(pathname.startsWith('/materi')) {
+    if (!profile || profile.role !== 'student') {
+      const url = request.nextUrl.clone()
+      if(profile?.role === 'admin'){
+        url.pathname = '/admin'
+      } else {
+        url.pathname = '/'
+      }
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Blokir akses ke halaman admin panel dan lempar ke halaman Dashboard Admin (/) jika bukan admin
+  if(pathname.startsWith('/admin')) {
+    if (!profile || profile.role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
   }
 
   return response
@@ -64,5 +80,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/materi/:path*',
+    '/admin/:path*'
   ],
 }

@@ -46,7 +46,19 @@ export default function Masuk() {
         if (error) throw error;
         
         // Jika sukses login, arahkan ke halaman utama materi
-        router.push("/");
+        const { data: { user } } = await supabase.auth.getUser()
+        const { data: profile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user?.id)
+          .single()
+        
+        if (profile?.role === "student") {
+          router.push("/");
+        }
+        else if (profile?.role === "admin") {
+          router.push("/admin");
+        }
         router.refresh();
       }
     } catch (err: any) {
@@ -66,7 +78,7 @@ export default function Masuk() {
           <div className="flex items-center gap-2 text-gray-500 text-sm hover:text-orange-400 transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="8" height="16" viewBox="0 0 12 24">
               <path d="M0 0h12v24H0z" fill="none" />
-              <path fill="currentColor" fill-rule="evenodd" d="m3.343 12l7.071 7.071L9 20.485l-7.778-7.778a1 1 0 0 1 0-1.414L9 3.515l1.414 1.414z" />
+              <path fill="currentColor" fillRule="evenodd" d="m3.343 12l7.071 7.071L9 20.485l-7.778-7.778a1 1 0 0 1 0-1.414L9 3.515l1.414 1.414z" />
             </svg>
             Kembali
           </div>

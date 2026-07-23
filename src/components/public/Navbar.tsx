@@ -147,7 +147,7 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 bg-slate-50 border border-slate-200 py-1.5 pl-2 pr-3 rounded-full hover:bg-slate-100 transition focus:outline-none"
+                  className="flex items-center gap-2 bg-slate-50 border border-slate-200 py-1.5 pl-2 pr-3 rounded-full hover:bg-slate-100 transition focus:outline-none cursor-pointer"
                 >
                   <div className="w-7 h-7 bg-orange-500 text-white font-bold text-xs rounded-full flex items-center justify-center shadow-inner">
                     {getInitials(profile.name)}
