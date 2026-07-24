@@ -53,9 +53,7 @@ export default function MateriForm({ initialData }: MateriFormProps) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // -------------------------------------------------------------
-  // CUSTOM IMAGE UPLOAD HANDLER UNTUK REACT QUILL
-  // -------------------------------------------------------------
+  // Image Handler untuk React Quill
   const imageHandler = () => {
     const input = document.createElement("input");
     input.setAttribute("type", "file");
@@ -69,14 +67,14 @@ export default function MateriForm({ initialData }: MateriFormProps) {
       try {
         setIsLoading(true);
 
-        // 1. Kompres Gambar
+        // Kompres Gambar
         const compressedOptions = {
           maxSizeMB: 0.3,
           maxWidthOrHeight: 1200,
         };
         const compressedFile = await imageCompression(file, compressedOptions);
 
-        // 2. Unggah ke Supabase Storage
+        // Upload ke Supabase Storage
         const fileExt = file.name.split(".").pop();
         const fileName = `materials/${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
@@ -86,20 +84,20 @@ export default function MateriForm({ initialData }: MateriFormProps) {
 
         if (uploadError) throw uploadError;
 
-        // 3. Dapatkan Public URL
+        // Ambil public URL gambar yang diupload
         const { data: urlData } = supabase.storage
           .from("reference-images")
           .getPublicUrl(fileName);
 
         const publicUrl = urlData.publicUrl;
 
-        // 4. Sisipkan Gambar ke Cursor React Quill
+        // Insert Gambar ke React Quill
         const editor = quillRef.current.getEditor();
         const range = editor.getSelection(true);
         editor.insertEmbed(range.index, "image", publicUrl);
         editor.setSelection(range.index + 1);
 
-        // 5. Tambahkan URL ke daftar image_urls
+        // Tambahkan URL ke daftar image_urls
         setUploadedImageUrls((prev) => [...prev, publicUrl]);
       } catch (err: any) {
         alert("Gagal mengunggah gambar: " + err.message);
@@ -128,7 +126,7 @@ export default function MateriForm({ initialData }: MateriFormProps) {
     []
   );
 
-  // Generate Slug Otomatis
+  // Generate slug materi
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -155,6 +153,25 @@ export default function MateriForm({ initialData }: MateriFormProps) {
       };
 
       if (isUpdate && initialData) {
+        const oldImageUrls = initialData?.image_urls;
+        if (oldImageUrls && oldImageUrls.length > 0) {
+          // Ekstrak relative path dari setiap public url
+          const filePaths = oldImageUrls.map((url) => {
+            const fileName = url.split("/").pop();
+            return `materials/${fileName}`;
+          });
+
+          const { error: storageError } = await supabase.storage
+            .from("reference-images")
+            .remove(filePaths);
+
+          if (storageError) {
+            console.error("Gagal menghapus beberapa berkas gambar dari storage:", storageError.message);
+          } else {
+            console.log(`${filePaths.length} gambar berhasil dibersihkan dari Storage!`);
+          }
+        }
+
         const { error } = await supabase
           .from("materials")
           .update(payload)
@@ -201,9 +218,9 @@ export default function MateriForm({ initialData }: MateriFormProps) {
             </select>
           </div>
 
-          {/* Urutan Bab */}
+          {/* Urutan Materi */}
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Urutan Bab (Order)</label>
+            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Urutan Materi (Order)</label>
             <input
               type="number"
               name="order_index"
@@ -216,7 +233,7 @@ export default function MateriForm({ initialData }: MateriFormProps) {
 
           {/* Embed Video Youtube */}
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">URL Video YouTube</label>
+            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Link URL Video YouTube</label>
             <input
               type="url"
               name="embed_media_urls"
@@ -244,7 +261,7 @@ export default function MateriForm({ initialData }: MateriFormProps) {
 
         {/* Rich Text Editor (React Quill) */}
         <div>
-          <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Isi Materi / Teks Bacaan</label>
+          <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Isi Materi</label>
           <div className="bg-white overflow-hidden">
             <ReactQuill
               forwardedRef={quillRef}

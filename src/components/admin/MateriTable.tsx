@@ -6,100 +6,107 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 interface Materi {
-    id: string;
-    bipa_level_id: string;
-    title: string;
-    slug: string;
-    content_text: string;
-    image_urls: string | null;
-    embed_media_urls: string | null;
-    order_index: number;
-    created_at: string;
+  id: string;
+  bipa_level_id: string;
+  title: string;
+  slug: string;
+  content_text: string;
+  image_urls: string[] | null;
+  embed_media_urls: string | null;
+  order_index: number;
+  created_at: string;
 }
 
 interface MateriTableProps {
-    initialMateri: Materi[];
+  initialMateri: Materi[];
 }
 
 export default function MateriTable({ initialMateri }: MateriTableProps) {
-    const router = useRouter();
-    const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-    const handleCreateData = () => {
-        router.push('/admin/materi/create');
-    };
+  const handleCreateData = () => {
+    router.push('/admin/materi/create');
+  };
 
-    // Live Search
-    const filteredProducts = initialMateri.filter((product) => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-            product.title.toLowerCase().includes(searchLower)
-        );
-    });
+  // Live Search
+  const filteredProducts = initialMateri.filter((material) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      material.title.toLowerCase().includes(searchLower)
+    );
+  });
 
-    // Pagination
-    const totalItems = filteredProducts.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+  // Pagination
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-    // Potong array data berdasarkan halaman yang aktif saat ini
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  // Potong array data berdasarkan halaman yang aktif saat ini
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
-    // Fungsi pengubah halaman
-    const goToPage = (pageNumber: number) => {
-        setCurrentPage(Math.max(1, Math.min(pageNumber, totalPages)));
-    };
+  // Fungsi pengubah halaman
+  const goToPage = (pageNumber: number) => {
+    setCurrentPage(Math.max(1, Math.min(pageNumber, totalPages)));
+  };
 
-    // Reset nomor halaman ke 1 setiap kali user mengetik di search bar
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1); 
-    };
+  // Reset nomor halaman ke 1 setiap kali user mengetik di search bar
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); 
+  };
 
     // Delete data handler
-    // const handleDeleteData = async (id: string, name: string, imageUrl: string | null) => {
-    //     if (window.confirm(`Apakah yakin ingin menghapus data '${name}'?`)) {
-    //         try {
-    //             // Delete image from storage if exist
-    //             if (imageUrl) {
-    //                 const fileName = imageUrl.split('/').pop();
-    //                 const filePath = `catalog/${fileName}`;
+    const handleDeleteData = async (
+      id: string, 
+      title: string, 
+      imageUrls: string[] | null
+    ) => {
+      if (window.confirm(`Apakah yakin ingin menghapus materi '${title}'?`)) {
+        try {
+          // Hapus semua berkas gambar dari Supabase Storage (jika ada)
+          if (imageUrls && imageUrls.length > 0) {
+            // Ekstrak relative path dari setiap Public URL
+            const filePaths = imageUrls.map((url) => {
+              const fileName = url.split("/").pop();
+              return `materials/${fileName}`;
+            });
 
-    //                 const { error } = await supabase
-    //                     .storage
-    //                     .from('reference-images')
-    //                     .remove([filePath]);
+            const { error: storageError } = await supabase
+              .storage
+              .from("reference-images")
+              .remove(filePaths);
 
-    //                 if (error) {
-    //                     console.error("Gagal hapus file di storage:", error.message);
-    //                 } else {
-    //                     console.log(`File ${filePath} berhasil dihapus!`);
-    //                 }
-    //             }
+            if (storageError) {
+              console.error("Gagal menghapus beberapa berkas gambar dari storage:", storageError.message);
+            } else {
+              console.log(`${filePaths.length} gambar berhasil dibersihkan dari Storage!`);
+            }
+          }
 
-    //             // Delete data
-    //             const { error } = await supabase
-    //                 .from('products')
-    //                 .delete()
-    //                 .eq('id', id)
+          // Hapus baris materi dari tabel 'materials'
+          const { error: deleteError } = await supabase
+            .from("materials")
+            .delete()
+            .eq("id", id);
 
-    //             if (error) throw error;
+          if (deleteError) throw deleteError;
 
-    //             // Reload page
-    //             alert('Berhasil dihapus!');
-    //             router.refresh();
-    //         } catch (err: any) {
-    //             alert(`Gagal menghapus data: ${err.message}`);
-    //         }
-    //     }
-    // }
+          // Notifikasi & Refresh Tampilan
+          alert("Materi berhasil dihapus!");
+          router.refresh();
+        } catch (err: any) {
+          alert(`Gagal menghapus materi: ${err.message}`);
+        }
+      }
+    };
 
     // Update data handler
     const handleUpdateData = (id: string) => {
-        router.push(`/admin/catalog/update/${id}`)
+        router.push(`/admin/materi/update/${id}`)
     }
 
     return (
@@ -168,9 +175,9 @@ export default function MateriTable({ initialMateri }: MateriTableProps) {
                                     </td>
                                     <td className="px-4 py-3.5 max-w-xs truncate">{item.order_index}</td>
                                     <td className="px-4 py-3.5 flex flex-wrap gap-2">
-                                        {/* <button type="button" onClick={() => handleDeleteData(item.id, item.name, item.image_url)} className="bg-red-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
+                                        <button type="button" onClick={() => handleDeleteData(item.id, item.title, item.image_urls)} className="bg-red-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
                                             Hapus
-                                        </button> */}
+                                        </button>
                                         <button type="button" onClick={() => handleUpdateData(item.id)} className="bg-yellow-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-yellow-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
                                             Edit
                                         </button>

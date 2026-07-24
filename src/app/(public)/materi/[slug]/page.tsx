@@ -130,9 +130,10 @@ export default function DetailMateriPage() {
       )}
 
       {/* Konten Materi (Render HTML Rich Text Editor dari Supabase) */}
-      <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-10">
+      <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-10 overflow-hidden">
         <div 
-          className="prose max-w-none text-sm md:text-base leading-relaxed text-slate-700
+          className="prose max-w-none text-sm md:text-base leading-relaxed text-slate-700 wrap-break-word
+                    [&_p]:mb-4 [&_p]:min-h-4
                     [&_h1]:text-2xl [&_h1]:font-extrabold [&_h1]:text-slate-900 [&_h1]:mt-6 [&_h1]:mb-3
                     [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h2]:mb-2.5
                     [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2

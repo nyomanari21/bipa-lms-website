@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import MateriForm from "@/components/admin/MateriForm";
 
-export default async function DashboardPage() {
+export default async function CreateMateriPage() {
     return (
         <div className="space-y-6 sm:top-20">
             {/* Header Catalog */}
