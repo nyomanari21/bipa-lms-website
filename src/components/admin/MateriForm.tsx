@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
 import imageCompression from "browser-image-compression";
-import "react-quill-new/dist/quill.snow.css"; // Atau "react-quill/dist/quill.snow.css"
+import "react-quill-new/dist/quill.snow.css";
 
 // Dynamic import ReactQuill agar tidak error di Next.js SSR
 const ReactQuill = dynamic(async () => {
-  const { default: RQ } = await import("react-quill-new"); // Bisa diganti 'react-quill'
+  const { default: RQ } = await import("react-quill-new");
   return function comp({ forwardedRef, ...props }: any) {
     return <RQ ref={forwardedRef} {...props} />;
   };

@@ -22,42 +22,42 @@ interface MateriTableProps {
 }
 
 export default function MateriTable({ initialMateri }: MateriTableProps) {
-  const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+    const router = useRouter();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
-  const handleCreateData = () => {
-    router.push('/admin/materi/create');
-  };
+    // Live Search
+    const filteredProducts = initialMateri.filter((material) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+        material.title.toLowerCase().includes(searchLower)
+        );
+    });
 
-  // Live Search
-  const filteredProducts = initialMateri.filter((material) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      material.title.toLowerCase().includes(searchLower)
-    );
-  });
+    // Pagination
+    const totalItems = filteredProducts.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Pagination
-  const totalItems = filteredProducts.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+    // Potong array data berdasarkan halaman yang aktif saat ini
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Potong array data berdasarkan halaman yang aktif saat ini
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+    // Fungsi pengubah halaman
+    const goToPage = (pageNumber: number) => {
+        setCurrentPage(Math.max(1, Math.min(pageNumber, totalPages)));
+    };
 
-  // Fungsi pengubah halaman
-  const goToPage = (pageNumber: number) => {
-    setCurrentPage(Math.max(1, Math.min(pageNumber, totalPages)));
-  };
+    // Reset nomor halaman ke 1 setiap kali user mengetik di search bar
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); 
+    };
 
-  // Reset nomor halaman ke 1 setiap kali user mengetik di search bar
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); 
-  };
+    const handleCreateData = () => {
+        router.push('/admin/materi/create');
+    };
 
     // Delete data handler
     const handleDeleteData = async (
@@ -148,7 +148,7 @@ export default function MateriTable({ initialMateri }: MateriTableProps) {
                                 <th className="px-4 py-3">Level BIPA</th>
                                 <th className="px-4 py-3">Judul</th>
                                 <th className="px-4 py-3">Slug</th>
-                                <th className="px-4 py-3 w-24">Isi Konten</th>
+                                <th className="px-4 py-3">Isi Konten</th>
                                 <th className="px-4 py-3">Link Youtube</th>
                                 <th className="px-4 py-3">Nomor Urut</th>
                                 <th className="px-4 py-3">Aksi</th>

@@ -21,6 +21,7 @@ export default function DetailMateriPage() {
   const slug = params.slug as string;
 
   const [material, setMaterial] = useState<MaterialDetail | null>(null);
+  const [quizId, setQuizId] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,17 +29,28 @@ export default function DetailMateriPage() {
       setLoading(true);
       
       // Ambil data satu materi yang cocok dengan slug di URL
-      const { data, error } = await supabase
+      const { data: materialData, error: materialError } = await supabase
         .from("materials")
         .select("id, title, slug, content_text, embed_media_urls, bipa_level_id")
         .eq("slug", slug)
         .single();
 
-      if (error) {
-        console.error("Gagal mengambil detail materi:", error.message);
+      if (materialError) {
+        console.error("Gagal mengambil detail materi:", materialError.message);
         setMaterial(null);
-      } else if (data) {
-        setMaterial(data);
+      } else if (materialData) {
+        setMaterial(materialData);
+      }
+
+      // Ambil data kuis yang terkait dengan materi
+      const { data: quizData, error: quizError } = await supabase
+        .from("quizzes")
+        .select("id")
+        .eq("material_id", materialData?.id)
+        .single();
+        
+      if (quizData) {
+        setQuizId(quizData);
       }
       
       setLoading(false);
@@ -147,17 +159,19 @@ export default function DetailMateriPage() {
       </div>
 
       {/* Navigasi Ke Latihan Soal */}
-      <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h4 className="font-bold text-orange-900 text-base">Sudah Paham dengan Materi Ini?</h4>
-          <p className="text-xs text-orange-600 mt-0.5">Uji kemampuan Bahasa Indonesia-mu lewat latihan soal di akhir bab.</p>
+      {quizId && (
+        <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 className="font-bold text-orange-900 text-base">Sudah Paham dengan Materi Ini?</h4>
+            <p className="text-xs text-orange-600 mt-0.5">Uji kemampuan Bahasa Indonesia-mu lewat latihan soal di akhir bab.</p>
+          </div>
+          <button
+            onClick={() => router.push(`/materi/${material.slug}/kuis`)}
+            className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer">
+            Mulai Latihan Soal &rarr;
+          </button>
         </div>
-        <button
-          onClick={() => router.push(`/materi/${material.slug}/kuis`)}
-          className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer">
-          Mulai Latihan Soal &rarr;
-        </button>
-      </div>
+      )}
     </div>
   );
 }

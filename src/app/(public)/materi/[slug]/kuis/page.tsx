@@ -49,7 +49,7 @@ export default function KuisPage() {
           return;
         }
 
-        // Ambil kuis yang terikat dengan materi (Gunakan select biasa tanpa .single untuk menghindari crash PGRST116)
+        // Ambil kuis yang terikat dengan materi
         const { data: quizData, error: quizError } = await supabase
           .from("quizzes")
           .select("id")
