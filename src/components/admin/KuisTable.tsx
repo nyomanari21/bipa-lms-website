@@ -74,45 +74,26 @@ export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
 
   // Delete data handler
   const handleDeleteData = async (
-    id: string
+    id: string,
+    question_text: string,
   ) => {
-    // if (window.confirm(`Apakah yakin ingin menghapus materi '${title}'?`)) {
-    //   try {
-    //     // Hapus semua berkas gambar dari Supabase Storage (jika ada)
-    //     if (imageUrls && imageUrls.length > 0) {
-    //       // Ekstrak relative path dari setiap Public URL
-    //       const filePaths = imageUrls.map((url) => {
-    //         const fileName = url.split("/").pop();
-    //         return `materials/${fileName}`;
-    //       });
+    if (window.confirm(`Apakah yakin ingin menghapus soal '${question_text}'?`)) {
+      try {
+        // Hapus baris soal dari tabel 'questions'
+        const { error: deleteError } = await supabase
+          .from("questions")
+          .delete()
+          .eq("id", id);
 
-    //       const { error: storageError } = await supabase
-    //         .storage
-    //         .from("reference-images")
-    //         .remove(filePaths);
+        if (deleteError) throw deleteError;
 
-    //       if (storageError) {
-    //         console.error("Gagal menghapus beberapa berkas gambar dari storage:", storageError.message);
-    //       } else {
-    //         console.log(`${filePaths.length} gambar berhasil dibersihkan dari Storage!`);
-    //       }
-    //     }
-
-    //     // Hapus baris materi dari tabel 'materials'
-    //     const { error: deleteError } = await supabase
-    //       .from("materials")
-    //       .delete()
-    //       .eq("id", id);
-
-    //     if (deleteError) throw deleteError;
-
-    //     // Notifikasi & Refresh Tampilan
-    //     alert("Materi berhasil dihapus!");
-    //     router.refresh();
-    //   } catch (err: any) {
-    //     alert(`Gagal menghapus materi: ${err.message}`);
-    //   }
-    // }
+        // Notifikasi & Refresh Tampilan
+        alert("Soal berhasil dihapus!");
+        router.refresh();
+      } catch (err: any) {
+        alert(`Gagal menghapus soal: ${err.message}`);
+      }
+    }
   };
 
   // Update data handler
@@ -204,7 +185,7 @@ export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
                                   </td>
                                   <td className="px-4 py-3.5 max-w-xs truncate">{item.question_number}</td>
                                   <td className="px-4 py-3.5 flex flex-wrap gap-2">
-                                      <button type="button" onClick={() => handleDeleteData(item.id)} className="bg-red-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
+                                      <button type="button" onClick={() => handleDeleteData(item.id, item.question_text)} className="bg-red-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
                                           Hapus
                                       </button>
                                       <button type="button" onClick={() => handleUpdateData(item.id)} className="bg-yellow-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-yellow-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
@@ -216,7 +197,7 @@ export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
                           ) : (
                               <tr>
                                   <td colSpan={6} className="px-4 py-10 text-center text-gray-400 text-xs">
-                                      Tidak ada produk buket yang cocok dengan pencarianmu.
+                                      Tidak ada soal yang cocok dengan pencarianmu.
                                   </td>
                               </tr>
                           )}
@@ -228,7 +209,7 @@ export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
               {totalPages > 1 && (
                   <div className="flex items-center justify-between p-4 border-t border-gray-50 bg-gray-50/30 text-xs">
                       <span className="text-gray-500">
-                          Menampilkan <span className="font-semibold text-gray-700">{indexOfFirstItem + 1}</span> - <span className="font-semibold text-gray-700">{Math.min(indexOfLastItem, totalItems)}</span> dari <span className="font-semibold text-gray-700">{totalItems}</span> total produk
+                          Menampilkan <span className="font-semibold text-gray-700">{indexOfFirstItem + 1}</span> - <span className="font-semibold text-gray-700">{Math.min(indexOfLastItem, totalItems)}</span> dari <span className="font-semibold text-gray-700">{totalItems}</span> total data
                       </span>
                       
                       <div className="flex items-center gap-1.5">

@@ -187,7 +187,7 @@ export default function MateriTable({ initialMateri }: MateriTableProps) {
                             ) : (
                                 <tr>
                                     <td colSpan={6} className="px-4 py-10 text-center text-gray-400 text-xs">
-                                        Tidak ada produk buket yang cocok dengan pencarianmu.
+                                        Tidak ada materi yang cocok dengan pencarianmu.
                                     </td>
                                 </tr>
                             )}
@@ -199,7 +199,7 @@ export default function MateriTable({ initialMateri }: MateriTableProps) {
                 {totalPages > 1 && (
                     <div className="flex items-center justify-between p-4 border-t border-gray-50 bg-gray-50/30 text-xs">
                         <span className="text-gray-500">
-                            Menampilkan <span className="font-semibold text-gray-700">{indexOfFirstItem + 1}</span> - <span className="font-semibold text-gray-700">{Math.min(indexOfLastItem, totalItems)}</span> dari <span className="font-semibold text-gray-700">{totalItems}</span> total produk
+                            Menampilkan <span className="font-semibold text-gray-700">{indexOfFirstItem + 1}</span> - <span className="font-semibold text-gray-700">{Math.min(indexOfLastItem, totalItems)}</span> dari <span className="font-semibold text-gray-700">{totalItems}</span> total data
                         </span>
                         
                         <div className="flex items-center gap-1.5">
