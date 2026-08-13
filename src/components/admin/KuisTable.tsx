@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import ImportExcelModal from "./ImportExcelModal";
 
 interface Quizzes {
+  id: string;
   title: string;
 }
 
@@ -23,13 +25,15 @@ interface Questions {
 
 interface QuestionsTableProps {
   initialQuestions: Questions[];
+  quizzes: Quizzes[];
 }
 
-export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
+export default function KuisTable({ quizzes, initialQuestions }: QuestionsTableProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Helper untuk mengonversi indeks angka (0, 1, 2, 3) menjadi huruf (A, B, C, D)
   const getOptionLetter = (indexStr: string | null) => {
@@ -122,12 +126,21 @@ export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
                       </button>
                   )}
               </div>
-              <button 
-                  onClick={handleCreateData}
-                  className="w-fit bg-green-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl hover:bg-green-600 transition-colors cursor-pointer shadow-sm"
-              >
-                  Tambah Data
-              </button>
+              <div className="flex gap-2">
+                <button 
+                    onClick={() => setIsImportOpen(true)}
+                    className="cursor-pointer bg-emerald-600 text-white text-xs font-semibold py-2.5 px-4 rounded-xl hover:bg-emerald-700 transition"
+                >
+                    📊 Import Excel
+                </button>
+
+                <button 
+                    onClick={handleCreateData}
+                    className="cursor-pointer bg-green-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl hover:bg-green-600 transition"
+                >
+                    + Tambah Data
+                </button>
+                </div>
           </div>
 
           {/* Table Content */}
@@ -247,6 +260,14 @@ export default function KuisTable({ initialQuestions }: QuestionsTableProps) {
                       </div>
                   </div>
               )}
+
+              {/* Panggil Modal Import */}
+            <ImportExcelModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                quizzes={quizzes}
+                onSuccess={() => router.refresh()}
+            />
           </div>
       </div>
   );

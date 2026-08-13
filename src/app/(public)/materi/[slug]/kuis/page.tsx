@@ -18,25 +18,26 @@ export default function KuisPage() {
   const router = useRouter();
   const slug = params.slug as string;
 
+  const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   
   // Objek menyimpan jawaban user: { indeksSoal: string/number }
   const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
   const [quizFinished, setQuizFinished] = useState(false);
+  const [finalScore, setFinalScore] = useState<number>(0);
 
-  // State Audio Recorder untuk Soal Speaking
+  // State Audio Recorder
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-  // Ambil Data Kuis & Soal dari Supabase berdasarkan slug materi
+  // Ambil Data Kuis & Soal dari Supabase
   useEffect(() => {
     async function fetchQuizData() {
       setLoading(true);
       try {
-        // Ambil id materi berdasarkan slug
         const { data: materialData, error: matError } = await supabase
           .from("materials")
           .select("id")
@@ -49,26 +50,24 @@ export default function KuisPage() {
           return;
         }
 
-        // Ambil kuis yang terikat dengan materi
         const { data: quizData, error: quizError } = await supabase
           .from("quizzes")
           .select("id")
           .eq("material_id", materialData.id);
 
-        // Cek apakah kuisnya ada di dalam array
         if (quizError || !quizData || quizData.length === 0) {
           console.error("Kuis tidak ditemukan untuk materi ini");
           setLoading(false);
           return;
         }
 
-        const activeQuizId = quizData[0].id;
+        const qId = quizData[0].id;
+        setActiveQuizId(qId);
 
-        // Ambil semua soalnya
         const { data: questionData, error: qError } = await supabase
           .from("questions")
           .select("id, question_text, question_type, options, correct_answer")
-          .eq("quiz_id", activeQuizId)
+          .eq("quiz_id", qId)
           .order("question_number", { ascending: true });
 
         if (qError) {
@@ -90,39 +89,32 @@ export default function KuisPage() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      // Format audio recording
-      let options = { mimeType: "audio/mp4" };
-
-      const recorder = new MediaRecorder(stream, options);
+      const recorder = new MediaRecorder(stream);
       const chunks: Blob[] = [];
 
       recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          chunks.push(e.data);
-        }
+        if (e.data && e.data.size > 0) chunks.push(e.data);
       };
 
       recorder.onstop = () => {
-        // Bungkus blob sesuai mimeType yang aktif digunakan
-        const blob = new Blob(chunks, { type: recorder.mimeType });
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/mp4" });
+        const localUrl = URL.createObjectURL(blob);
         
-        // Simpan ke state jawaban user
-        setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: url }));
+        // Simpan objek Blob dan Local URL ke state jawaban
+        setUserAnswers((prev) => ({
+          ...prev,
+          [currentQuestionIndex]: { blob, localUrl },
+        }));
       };
 
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
     } catch (err) {
-      console.error(err);
-      alert("Gagal mengakses mikrofon perangkat Anda. Pastikan izin mikrofon sudah diaktifkan di browser.");
+      alert("Gagal mengakses mikrofon. Pastikan izin mikrofon diizinkan di browser.");
     }
   };
 
-  // Fungsi Menghentikan Rekam Suara
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
       mediaRecorder.stop();
@@ -130,29 +122,145 @@ export default function KuisPage() {
     }
   };
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const selectedAnswer = userAnswers[currentQuestionIndex] !== undefined ? userAnswers[currentQuestionIndex] : null;
-
-  // Kalkulasi Nilai Hardcode (Hanya mengecek Multiple Choice & Short Answer)
-  const hitungNilaiAkhir = () => {
+  // Kalkulasi Skor Otomatis (Khusus Multiple Choice & Short Answer)
+  const hitungNilaiOtomatis = () => {
     let correctCount = 0;
     let scorableQuestions = 0;
 
     questions.forEach((q, index) => {
       if (q.question_type === "multiple_choice") {
         scorableQuestions++;
-        if (String(userAnswers[index]) === q.correct_answer) correctCount++;
+        if (String(userAnswers[index]) === String(q.correct_answer)) correctCount++;
       } else if (q.question_type === "short_answer") {
         scorableQuestions++;
-        const userAnswerClean = String(userAnswers[index] || "").trim().toLowerCase();
-        const correctAnswerClean = String(q.correct_answer || "").trim().toLowerCase();
-        if (userAnswerClean === correctAnswerClean) correctCount++;
+        const userClean = String(userAnswers[index] || "").trim().toLowerCase();
+        const correctClean = String(q.correct_answer || "").trim().toLowerCase();
+        if (userClean === correctClean) correctCount++;
       }
-      // Note: Untuk Esai & Speaking nilainya 0 karena harus diperiksa dosen manual via dashboard admin nanti
     });
 
     return scorableQuestions > 0 ? Math.round((correctCount / scorableQuestions) * 100) : 100;
   };
+
+  // Submit data kuis ke Supabase database & storage
+  const handleSubmitQuiz = async () => {
+    if (!activeQuizId) return;
+    setIsSubmitting(true);
+
+    try {
+      // Ambil session user mahasiswa
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Anda harus login untuk mengirim kuis.");
+
+      const autoScore = hitungNilaiOtomatis();
+
+      // Buat baris baru di tabel student_quiz_attempts
+      const { data: attempt, error: attemptError } = await supabase
+        .from("student_quiz_attempts")
+        .insert({
+          quiz_id: activeQuizId,
+          student_id: user.id,
+          final_score: autoScore,
+          status: "submitted",
+        })
+        .select("id")
+        .single();
+
+      if (attemptError) throw attemptError;
+
+      // Loop setiap jawaban untuk disusun ke student_answers
+      const answerPayloads = [];
+
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        const rawAnswer = userAnswers[i];
+
+        let answerText: string | null = null;
+        let answerAudioUrl: string | null = null;
+        let isCorrect: boolean | null = null;
+        let itemScore: number | null = null;
+
+        // Jika Tipe Soal Latihan Berbicara/Speaking
+        if (q.question_type === "speaking" && rawAnswer?.blob) {
+          const fileExt = rawAnswer.blob.type.includes("webm") ? "webm" : "mp4";
+          const filePath = `speaking/${user.id}/${attempt.id}_q${q.id}.${fileExt}`;
+
+          // Upload ke Supabase Storage (audio-answers)
+          const { error: uploadErr } = await supabase.storage
+            .from("audio-answers")
+            .upload(filePath, rawAnswer.blob, {
+              contentType: rawAnswer.blob.type || "audio/mp4",
+              upsert: true,
+            });
+
+          if (uploadErr) throw uploadErr;
+
+          // Dapatkan Public URL
+          const { data: urlData } = supabase.storage
+            .from("audio-answers")
+            .getPublicUrl(filePath);
+
+          answerAudioUrl = urlData.publicUrl; // Masuk ke kolom student_answer_audio_url
+          answerText = null;
+          isCorrect = null;
+          itemScore = null; // Menunggu penilaian dosen
+        } 
+        
+        // Jika Tipe Soal Pilihan Ganda
+        else if (q.question_type === "multiple_choice") {
+          answerText = String(rawAnswer ?? "");
+          isCorrect = String(rawAnswer) === String(q.correct_answer);
+          itemScore = isCorrect ? 100 : 0;
+          answerAudioUrl = null;
+        } 
+        
+        // Jika Tipe Soal Isian Singkat
+        else if (q.question_type === "short_answer") {
+          answerText = String(rawAnswer ?? "").trim();
+          const userClean = answerText.toLowerCase();
+          const correctClean = String(q.correct_answer || "").trim().toLowerCase();
+          isCorrect = userClean === correctClean;
+          itemScore = isCorrect ? 100 : 0;
+          answerAudioUrl = null;
+        } 
+        
+        // Jika Tipe Soal Esai
+        else {
+          answerText = String(rawAnswer ?? "").trim();
+          answerAudioUrl = null;
+          isCorrect = null;
+          itemScore = null; // Menunggu penilaian dosen
+        }
+
+        answerPayloads.push({
+          attempt_id: attempt.id,
+          question_id: q.id,
+          student_answer_text: answerText,
+          student_answer_audio_url: answerAudioUrl,
+          is_correct: isCorrect,
+          score: itemScore,
+          teacher_feedback: null, // Masih kosong saat dikirim mahasiswa
+        });
+      }
+
+      // Bulk insert jawaban ke tabel student_answers
+      const { error: ansError } = await supabase
+        .from("student_answers")
+        .insert(answerPayloads);
+
+      if (ansError) throw ansError;
+
+      setFinalScore(autoScore);
+      setQuizFinished(true);
+    } catch (err: any) {
+      alert("Gagal mengirim jawaban kuis: " + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const selectedAnswer = userAnswers[currentQuestionIndex] !== undefined ? userAnswers[currentQuestionIndex] : null;
 
   if (loading) return <div className="max-w-3xl mx-auto px-4 py-16 text-center text-slate-500 font-medium">Memuat kuis dari database...</div>;
   if (questions.length === 0) return <div className="max-w-3xl mx-auto px-4 py-16 text-center text-slate-400">Belum ada soal latihan untuk bab ini.</div>;
@@ -160,15 +268,15 @@ export default function KuisPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:px-6 md:py-10 bg-slate-50 text-slate-800">
       {quizFinished ? (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-6">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
           <div className="text-5xl">🎉</div>
           <div>
             <h2 className="text-2xl font-extrabold text-slate-900">Latihan Selesai Diajukan!</h2>
-            <p className="text-xs text-slate-400 mt-1">Nilai pilihan ganda & isian terhitung otomatis. Soal esai & rekaman suara Anda akan diperiksa oleh Dosen.</p>
+            <p className="text-xs text-slate-400 mt-1">Jawaban Anda berhasil disimpan. Nilai esai & rekaman suara akan diperiksa oleh Dosen.</p>
           </div>
           <div className="inline-block bg-orange-50 border border-orange-100 rounded-2xl px-8 py-4">
             <span className="block text-xs font-semibold text-orange-600 uppercase tracking-wider">Skor Sementara (PG & Isian)</span>
-            <span className="text-5xl font-black text-orange-500">{hitungNilaiAkhir()} / 100</span>
+            <span className="text-5xl font-black text-orange-500">{finalScore} / 100</span>
           </div>
           <div className="pt-4 flex justify-center gap-3">
             <button onClick={() => router.push("/materi")} className="bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-orange-600 transition shadow-md cursor-pointer">
@@ -180,7 +288,7 @@ export default function KuisPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between border-b border-slate-200 pb-4">
             <div>
-              <span className="text-xs font-bold text-orange-500 uppercase tracking-wider">Evaluasi BIPA 1</span>
+              <span className="text-xs font-bold text-orange-500 uppercase tracking-wider">Evaluasi BIPA</span>
               <h1 className="text-xl font-extrabold text-slate-900 mt-0.5">Tipe Soal: {currentQuestion.question_type.replace("_", " ").toUpperCase()}</h1>
             </div>
             <span className="text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1 rounded-full">Soal {currentQuestionIndex + 1} dari {questions.length}</span>
@@ -189,9 +297,7 @@ export default function KuisPage() {
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <h3 className="text-base md:text-lg font-bold text-slate-900 leading-relaxed">{currentQuestion.question_text}</h3>
 
-            {/* RENDER KOMPONEN INPUT DINAMIS BERDASARKAN TIPE SOAL */}
-            
-            {/* A. PILIHAN GANDA */}
+            {/* Pilihan Ganda */}
             {currentQuestion.question_type === "multiple_choice" && currentQuestion.options && (
               <div className="grid gap-3">
                 {currentQuestion.options.map((option, idx) => {
@@ -215,7 +321,7 @@ export default function KuisPage() {
               </div>
             )}
 
-            {/* B. ISIAN SINGKAT */}
+            {/* Isian Singkat */}
             {currentQuestion.question_type === "short_answer" && (
               <input
                 type="text"
@@ -226,7 +332,7 @@ export default function KuisPage() {
               />
             )}
 
-            {/* C. ESAI */}
+            {/* Esai */}
             {currentQuestion.question_type === "essay" && (
               <textarea
                 rows={4}
@@ -237,7 +343,7 @@ export default function KuisPage() {
               />
             )}
 
-            {/* D. REKAMAN AUDIO */}
+            {/* Latihan Berbicara */}
             {currentQuestion.question_type === "speaking" && (
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-4">
                 <p className="text-xs text-slate-400">Klik tombol mikrofon untuk mulai berbicara, klik stop jika sudah selesai.</p>
@@ -252,10 +358,10 @@ export default function KuisPage() {
                     </button>
                   )}
                 </div>
-                {selectedAnswer && (
+                {selectedAnswer?.localUrl && (
                   <div className="w-full pt-2 border-t border-slate-200 flex flex-col items-center gap-2">
                     <span className="text-[10px] text-green-600 font-bold">✓ Rekaman Berhasil Tersimpan Secara Lokal</span>
-                    <audio src={selectedAnswer} controls className="h-8 max-w-xs" />
+                    <audio src={selectedAnswer.localUrl} controls className="h-8 max-w-xs" />
                   </div>
                 )}
               </div>
@@ -265,11 +371,8 @@ export default function KuisPage() {
           {/* NAVIGASI KUIS */}
           <div className="flex justify-between items-center pt-2">
             <button
-              onClick={() => {
-                setCurrentQuestionIndex((prev) => prev - 1);
-                setAudioUrl(null);
-              }}
-              disabled={currentQuestionIndex === 0}
+              onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
+              disabled={currentQuestionIndex === 0 || isSubmitting}
               className={`px-5 py-3 rounded-xl font-bold text-sm border transition ${
                 currentQuestionIndex > 0 ? "bg-white border-slate-200 text-slate-700 cursor-pointer" : "bg-slate-100 text-slate-300 cursor-not-allowed opacity-50"
               }`}
@@ -277,22 +380,23 @@ export default function KuisPage() {
               ← Soal Sebelumnya
             </button>
 
-            <button
-              onClick={() => {
-                if (currentQuestionIndex + 1 < questions.length) {
-                  setCurrentQuestionIndex((prev) => prev + 1);
-                  setAudioUrl(null);
-                } else {
-                  setQuizFinished(true);
-                }
-              }}
-              disabled={selectedAnswer === null || selectedAnswer === ""}
-              className={`px-6 py-3 rounded-xl font-bold text-sm shadow-md transition ${
-                selectedAnswer !== null && selectedAnswer !== "" ? "bg-orange-500 text-white hover:bg-orange-600 cursor-pointer" : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-              }`}
-            >
-              {currentQuestionIndex + 1 === questions.length ? "Selesai Kuis" : "Soal Berikutnya →"}
-            </button>
+            {currentQuestionIndex + 1 === questions.length ? (
+              <button
+                onClick={handleSubmitQuiz}
+                disabled={selectedAnswer === null || selectedAnswer === "" || isSubmitting}
+                className="px-6 py-3 rounded-xl font-bold text-sm bg-green-600 text-white hover:bg-green-700 transition shadow-md disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
+              >
+                {isSubmitting ? "Mengirim Jawaban..." : "Selesai & Kirim Kuis ✓"}
+              </button>
+            ) : (
+              <button
+                onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
+                disabled={selectedAnswer === null || selectedAnswer === "" || isSubmitting}
+                className="px-6 py-3 rounded-xl font-bold text-sm bg-orange-500 text-white hover:bg-orange-600 transition shadow-md disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
+              >
+                Soal Berikutnya →
+              </button>
+            )}
           </div>
         </div>
       )}

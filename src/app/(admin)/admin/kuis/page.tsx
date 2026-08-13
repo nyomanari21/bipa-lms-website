@@ -4,17 +4,24 @@ import KuisTable from "@/components/admin/KuisTable";
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-    const { data: questions, error } = await supabase
+    const { data: questions, error: errQuestions } = await supabase
       .from('questions')
       .select(`
         *,
-        quizzes(title)
+        quizzes(id,title)
       `)
       .order('created_at', { ascending: false })
 
-      console.log('data', questions);
-    if (error) {
-      return <div className="p-10">Gagal ambil data: {error.message}</div>
+    if (errQuestions) {
+      return <div className="p-10">Gagal ambil data soal: {errQuestions.message}</div>
+    }
+
+    const { data: quizzes, error: errQuizzes } = await supabase
+      .from('quizzes')
+      .select('*')
+    
+    if (errQuizzes) {
+      return <div className="p-10">Gagal ambil data kuis: {errQuizzes.message}</div>
     }
 
     return (
@@ -28,7 +35,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Table */}
-        <KuisTable initialQuestions={questions || []} />
+        <KuisTable quizzes={quizzes} initialQuestions={questions || []} />
       </div>
     );
 }

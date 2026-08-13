@@ -172,18 +172,42 @@ export default function MateriForm({ initialData }: MateriFormProps) {
           }
         }
 
-        const { error } = await supabase
+        const { data: updateMaterial, error: updateMaterialError } = await supabase
           .from("materials")
           .update(payload)
           .eq("id", initialData.id);
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("materials")
-          .insert([payload]);
+        if (updateMaterialError) throw updateMaterialError;
 
-        if (error) throw error;
+        // Update data quizzes untuk materi yang diupdate
+        const { error: quizUpdateError } = await supabase
+          .from("quizzes")
+          .update({
+            title: `Evaluasi ${formData.title}`,
+          })
+          .eq("material_id", initialData.id);
+
+        if (quizUpdateError) throw quizUpdateError;
+      } else {
+        const { data:newMaterial, error: newMaterialError } = await supabase
+          .from("materials")
+          .insert([payload])
+          .select()
+          .single();
+
+        if (newMaterialError) throw newMaterialError;
+
+        // Tambah data di tabel quizzes untuk materi baru
+        const { error: quizError } = await supabase
+          .from("quizzes")
+          .insert([
+            {
+              material_id: newMaterial.id,
+              title: `Evaluasi ${newMaterial.title}`,
+            },
+          ]);
+
+        if (quizError) throw quizError;
       }
 
       router.push("/admin/materi");
@@ -213,8 +237,6 @@ export default function MateriForm({ initialData }: MateriFormProps) {
               className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500"
             >
               <option value={1}>BIPA 1</option>
-              <option value={2}>BIPA 2</option>
-              <option value={3}>BIPA 3</option>
             </select>
           </div>
 
