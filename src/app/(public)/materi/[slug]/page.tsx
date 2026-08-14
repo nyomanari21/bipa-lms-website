@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-// Definisikan tipe data untuk detail materi
+// Definisi tipe data untuk detail materi
 interface MaterialDetail {
   id: string;
   title: string;
@@ -15,6 +15,13 @@ interface MaterialDetail {
   bipa_level_id: number;
 }
 
+// Definisi tipe data untuk pengerjaan kuis
+interface QuizAttemptDetail {
+  final_score: number,
+  status: string,
+  attempted_at: string;
+}
+
 export default function DetailMateriPage() {
   const params = useParams();
   const router = useRouter();
@@ -22,6 +29,7 @@ export default function DetailMateriPage() {
 
   const [material, setMaterial] = useState<MaterialDetail | null>(null);
   const [quizId, setQuizId] = useState<{ id: string } | null>(null);
+  const [attempt, setAttempt] = useState<QuizAttemptDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,6 +59,25 @@ export default function DetailMateriPage() {
         
       if (quizData) {
         setQuizId(quizData);
+
+        // Jika ada data kuis dari materi yang terkait, cek apakah siswa sudah pernah mengerjakan kuis
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: userQuizAttempt, error: attemptError } = await supabase
+            .from("student_quiz_attempts")
+            .select("final_score, status, attempted_at")
+            .match({
+              student_id: session.user.id,
+              quiz_id: quizData?.id
+            })
+            .maybeSingle();
+
+            console.log('data attempt:', userQuizAttempt);
+
+          if (userQuizAttempt) {
+            setAttempt(userQuizAttempt);
+          }
+        }
       }
       
       setLoading(false);
@@ -158,19 +185,62 @@ export default function DetailMateriPage() {
         />
       </div>
 
-      {/* Navigasi Ke Latihan Soal */}
+      {/* Section Evaluasi / Kuis Materi */}
       {quizId && (
-        <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h4 className="font-bold text-orange-900 text-base">Sudah Paham dengan Materi Ini?</h4>
-            <p className="text-xs text-orange-600 mt-0.5">Uji kemampuan Bahasa Indonesia-mu lewat latihan soal di akhir bab.</p>
-          </div>
-          <button
-            onClick={() => router.push(`/materi/${material.slug}/kuis`)}
-            className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer">
-            Mulai Latihan Soal &rarr;
-          </button>
-        </div>
+        <>
+          {attempt ? (
+            /* Jika Sudah Mengerjakan */
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-700 font-bold text-base">
+                    ✓ Kamu Sudah Mengerjakan Latihan Ini!
+                  </span>
+                  <span
+                    className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                      attempt.status === "graded"
+                        ? "bg-emerald-200 text-emerald-800"
+                        : "bg-amber-100 text-amber-800 border border-amber-200"
+                    }`}
+                  >
+                    {attempt.status === "graded" ? "Selesai Dinilai" : "Menunggu Review"}
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-600 mt-1">
+                  Dikerjakan pada{" "}
+                  {new Date(attempt.attempted_at).toLocaleString("id-ID", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="bg-emerald-600 text-white px-5 py-3 rounded-xl text-sm font-black shadow-sm whitespace-nowrap">
+                  Skor: {attempt.final_score} / 100
+                </span>
+              </div>
+            </div>
+          ) : (
+            /* Jika Belum Mengerjakan */
+            <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h4 className="font-bold text-orange-900 text-base">
+                  Sudah Paham dengan Materi Ini?
+                </h4>
+                <p className="text-xs text-orange-600 mt-0.5">
+                  Uji kemampuan Bahasa Indonesia-mu lewat latihan soal di akhir bab.
+                </p>
+              </div>
+              <button
+                onClick={() => router.push(`/materi/${material.slug}/kuis`)}
+                className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer"
+              >
+                Mulai Latihan Soal &rarr;
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

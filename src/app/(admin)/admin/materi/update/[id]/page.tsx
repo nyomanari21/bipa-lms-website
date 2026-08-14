@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase.server";
 import MateriForm from "@/components/admin/MateriForm";
 
 export default async function UpdateMateriPage({
@@ -7,6 +7,8 @@ export default async function UpdateMateriPage({
 }: {
     params: Promise<{ id: string }>
 }) {
+    const supabase = await createSupabaseServerClient();
+    
     const { id } = await params;
 
     const { data: material, error } = await supabase

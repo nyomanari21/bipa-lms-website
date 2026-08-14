@@ -1,9 +1,11 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase.server";
 import MateriTable from "@/components/admin/MateriTable";
 
 export const revalidate = 0;
 
-export default async function DashboardPage() {
+export default async function AdminMateriPage() {
+  const supabase = await createSupabaseServerClient();
+  
   const { data: materials, error } = await supabase
     .from('materials')
     .select('*')
@@ -11,14 +13,6 @@ export default async function DashboardPage() {
 
   if (error) {
     return <div className="p-10">Gagal ambil data: {error.message}</div>
-  }
-
-  const { data: bipaLevels, error: bipaLevelsError } = await supabase
-    .from('bipa_levels')
-    .select('id, level_name')
-  
-  if (bipaLevelsError) {
-    return <div className="p-10">Gagal ambil data: {bipaLevelsError.message}</div>
   }
 
   return (

@@ -1,7 +1,9 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase.server";
 import KuisForm from "@/components/admin/KuisForm";
 
 export default async function CreateKuisPage() {
+  const supabase = await createSupabaseServerClient();
+  
   const { data: quizzData, error } = await supabase
     .from('quizzes')
     .select(`id, title`)

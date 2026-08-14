@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase.server";
 import KuisForm from "@/components/admin/KuisForm";
 import { notFound } from "next/navigation";
 
@@ -7,6 +7,8 @@ export default async function UpdateKuisPage({
 }: {
   params: Promise<{ id: String }>
 }) {
+  const supabase = await createSupabaseServerClient();
+  
   const { id } = await params;
 
   const { data: quizzData, error: errQuiz } = await supabase

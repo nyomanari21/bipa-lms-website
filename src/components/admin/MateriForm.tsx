@@ -210,6 +210,7 @@ export default function MateriForm({ initialData }: MateriFormProps) {
         if (quizError) throw quizError;
       }
 
+      alert(`Berhasil ${isUpdate ? "memperbarui" : "menambahkan"} data materi!`);
       router.push("/admin/materi");
       router.refresh();
     } catch (err: any) {
