@@ -29,6 +29,10 @@ export default function KuisPage() {
   const [quizFinished, setQuizFinished] = useState(false);
   const [finalScore, setFinalScore] = useState<number>(0);
 
+  // Objek menyimpan status penilaian dan tipe soal pada kuis (dengan PG & isian singkat atau tidak)
+  const [finalStatus, setFinalStatus] = useState<string | null>(null);
+  const [withMCOrShortAnswer, setWithMCOrShortAnswer] = useState(false);
+
   // State Audio Recorder
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -139,7 +143,12 @@ export default function KuisPage() {
       }
     });
 
-    return scorableQuestions > 0 ? Math.round((correctCount / scorableQuestions) * 100) : 100;
+    const score = scorableQuestions > 0 ? Math.round((correctCount / scorableQuestions) * 100) : 100;
+
+    return {
+      score,
+      scorableQuestions,
+    }
   };
 
   // Submit data kuis ke Supabase database & storage
@@ -152,7 +161,13 @@ export default function KuisPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Anda harus login untuk mengirim kuis.");
 
-      const autoScore = hitungNilaiOtomatis();
+      // const autoScore = hitungNilaiOtomatis();
+      const { score: autoScore, scorableQuestions } = hitungNilaiOtomatis();
+      const totalQuestion = questions.length;
+
+      // Jika semua soalnya bertipe PG/isian singkat, set statusnya menjadi "graded"
+      // Jika ada soal bertipe esai/latihan berbicara, set statusnya menjadi "submitted"
+      const finalStatus = scorableQuestions === totalQuestion ? "graded" : "submitted";
 
       // Buat baris baru di tabel student_quiz_attempts
       const { data: attempt, error: attemptError } = await supabase
@@ -161,7 +176,7 @@ export default function KuisPage() {
           quiz_id: activeQuizId,
           student_id: user.id,
           final_score: autoScore,
-          status: "submitted",
+          status: finalStatus,
         })
         .select("id")
         .single();
@@ -251,6 +266,8 @@ export default function KuisPage() {
       if (ansError) throw ansError;
 
       setFinalScore(autoScore);
+      setFinalStatus(finalStatus);
+      setWithMCOrShortAnswer(scorableQuestions > 0);
       setQuizFinished(true);
     } catch (err: any) {
       alert("Gagal mengirim jawaban kuis: " + err.message);
@@ -268,23 +285,78 @@ export default function KuisPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:px-6 md:py-10 bg-slate-50 text-slate-800">
       {quizFinished ? (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="text-5xl">🎉</div>
-          <div>
-            <h2 className="text-2xl font-extrabold text-slate-900">Latihan Selesai Diajukan!</h2>
-            <p className="text-xs text-slate-400 mt-1">Jawaban Anda berhasil disimpan. Nilai esai & rekaman suara akan diperiksa oleh Dosen.</p>
+        // Halaman Kuis Selesai
+        <>
+          {/* Halaman Kuis Selesai */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 md:p-10 text-center max-w-lg mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            {/* Icon / Badge Status */}
+            <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl shadow-sm border bg-slate-50 border-slate-100">
+              {finalStatus === "graded" ? "🏆" : "📝"}
+            </div>
+
+            {/* Header Info */}
+            <div className="space-y-1.5">
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                {finalStatus === "graded" ? "Latihan Selesai Dikerjakan!" : "Latihan Berhasil Dikirim!"}
+              </h2>
+              <p className="text-xs md:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                {finalStatus === "graded"
+                  ? "Jawaban kamu telah tersimpan dan terhitung secara otomatis."
+                  : "Jawaban tersimpan. Bagian esai dan rekaman suara akan ditinjau oleh Dosen terlebih dahulu."}
+              </p>
+            </div>
+
+            {/* Score Box (Hanya muncul jika ada soal yang dinilai otomatis) */}
+            {(finalStatus === "graded" || withMCOrShortAnswer) ? (
+              <div
+                className={`rounded-2xl p-5 border transition-all ${
+                  finalStatus === "graded"
+                    ? "bg-emerald-50/60 border-emerald-100"
+                    : "bg-orange-50/60 border-orange-100"
+                }`}
+              >
+                <span
+                  className={`block text-[11px] font-bold uppercase tracking-wider ${
+                    finalStatus === "graded" ? "text-emerald-700" : "text-orange-700"
+                  }`}
+                >
+                  {finalStatus === "graded" ? "Nilai Akhir" : "Skor Sementara (PG & Isian)"}
+                </span>
+                <div className="mt-1 flex items-baseline justify-center gap-1">
+                  <span
+                    className={`text-5xl font-black tracking-tight ${
+                      finalStatus === "graded" ? "text-emerald-600" : "text-orange-600"
+                    }`}
+                  >
+                    {finalScore}
+                  </span>
+                  <span className="text-sm font-bold text-slate-400">/ 100</span>
+                </div>
+              </div>
+            ) : (
+              /* Card Info Ringkas untuk Kuis yang Full Esai / Speaking */
+              <div className="rounded-2xl p-4 bg-slate-50 border border-slate-100 text-xs text-slate-600 font-medium">
+                ⏳ Status: <span className="text-orange-600 font-bold">Menunggu Evaluasi Dosen</span>
+              </div>
+            )}
+
+            {/* Tombol Aksi */}
+            <div className="pt-2">
+              <button
+                onClick={() => router.push("/materi")}
+                className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white shadow-sm transition cursor-pointer ${
+                  finalStatus === "graded"
+                    ? "bg-emerald-600 hover:bg-emerald-700"
+                    : "bg-orange-500 hover:bg-orange-600"
+                }`}
+              >
+                Kembali ke Daftar Materi
+              </button>
+            </div>
           </div>
-          <div className="inline-block bg-orange-50 border border-orange-100 rounded-2xl px-8 py-4">
-            <span className="block text-xs font-semibold text-orange-600 uppercase tracking-wider">Skor Sementara (PG & Isian)</span>
-            <span className="text-5xl font-black text-orange-500">{finalScore} / 100</span>
-          </div>
-          <div className="pt-4 flex justify-center gap-3">
-            <button onClick={() => router.push("/materi")} className="bg-orange-500 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-orange-600 transition shadow-md cursor-pointer">
-              Kembali ke Materi
-            </button>
-          </div>
-        </div>
+        </>
       ) : (
+        // Halaman Pengerjaan Kuis
         <div className="space-y-6">
           <div className="flex items-center justify-between border-b border-slate-200 pb-4">
             <div>

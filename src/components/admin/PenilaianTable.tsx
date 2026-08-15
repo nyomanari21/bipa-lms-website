@@ -98,7 +98,7 @@ export default function PenilaianTable({ initialAttempts }: PenilaianTableProps)
                 <th className="px-4 py-3 text-center w-12">No</th>
                 <th className="px-4 py-3">Nama Siswa</th>
                 <th className="px-4 py-3">Judul Kuis</th>
-                <th className="px-4 py-3 text-center">Skor Sementara</th>
+                <th className="px-4 py-3 text-center">Nilai</th>
                 <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-4 py-3">Waktu Pengajuan</th>
                 <th className="px-4 py-3 text-center">Aksi</th>

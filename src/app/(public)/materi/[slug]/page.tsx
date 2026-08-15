@@ -17,6 +17,7 @@ interface MaterialDetail {
 
 // Definisi tipe data untuk pengerjaan kuis
 interface QuizAttemptDetail {
+  id: string;
   final_score: number,
   status: string,
   attempted_at: string;
@@ -65,7 +66,7 @@ export default function DetailMateriPage() {
         if (session?.user) {
           const { data: userQuizAttempt, error: attemptError } = await supabase
             .from("student_quiz_attempts")
-            .select("final_score, status, attempted_at")
+            .select("id, final_score, status, attempted_at")
             .match({
               student_id: session.user.id,
               quiz_id: quizData?.id
@@ -190,23 +191,24 @@ export default function DetailMateriPage() {
         <>
           {attempt ? (
             /* Jika Sudah Mengerjakan */
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
+            <div className="bg-white border border-emerald-100 rounded-2xl p-5 md:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              {/* Sisi Kiri: Status & Info Waktu */}
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-emerald-700 font-bold text-base">
-                    ✓ Kamu Sudah Mengerjakan Latihan Ini!
+                    ✓ Latihan Telah Selesai
                   </span>
                   <span
-                    className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                    className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md tracking-wider ${
                       attempt.status === "graded"
-                        ? "bg-emerald-200 text-emerald-800"
-                        : "bg-amber-100 text-amber-800 border border-amber-200"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border border-amber-200"
                     }`}
                   >
                     {attempt.status === "graded" ? "Selesai Dinilai" : "Menunggu Review"}
                   </span>
                 </div>
-                <p className="text-xs text-emerald-600 mt-1">
+                <p className="text-xs text-slate-400">
                   Dikerjakan pada{" "}
                   {new Date(attempt.attempted_at).toLocaleString("id-ID", {
                     dateStyle: "medium",
@@ -215,10 +217,26 @@ export default function DetailMateriPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="bg-emerald-600 text-white px-5 py-3 rounded-xl text-sm font-black shadow-sm whitespace-nowrap">
-                  Skor: {attempt.final_score} / 100
-                </span>
+              {/* Sisi Kanan: Nilai & Tombol Review */}
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                {attempt.status === "graded" && (
+                  <>
+                    <div className="text-left sm:text-right pr-2">
+                      <span className="block text-[10px] font-bold uppercase text-slate-400">
+                        Nilai Akhir
+                      </span>
+                      <span className="text-xl font-black text-emerald-600">
+                        {attempt.final_score ?? 0} <span className="text-xs font-semibold text-slate-400">/ 100</span>
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => router.push(`/materi/${material.slug}/${attempt.id}`)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer whitespace-nowrap"
+                    >
+                      Lihat Review →
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ) : (

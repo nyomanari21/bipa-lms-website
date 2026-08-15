@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase.server";
-import PenilaianForm from "@/components/admin/PenilaianForm";
+import ReviewKuisForm from "@/components/public/ReviewKuisForm";
 
 export const revalidate = 0;
 
@@ -8,7 +8,7 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function PenilaianDetailPage({ params }: PageProps) {
+export default async function ReviewKuisPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
@@ -29,6 +29,8 @@ export default async function PenilaianDetailPage({ params }: PageProps) {
   if (attemptError || !attempt) {
     return notFound();
   }
+
+  console.log('student_quz_attempts: ', attempt);
 
   // Ambil seluruh lembar jawaban siswa yang di-join dengan teks & tipe pertanyaan
   const { data: answers, error: answersError } = await supabase
@@ -60,9 +62,11 @@ export default async function PenilaianDetailPage({ params }: PageProps) {
     );
   }
 
+  console.log('student_answers: ', answers);
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-12">
-      <PenilaianForm attempt={attempt as any} initialAnswers={answers as any} />
+      <ReviewKuisForm attempt={attempt as any} initialAnswers={answers as any} />
     </div>
   );
 }
