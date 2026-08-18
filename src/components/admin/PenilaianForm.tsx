@@ -159,6 +159,7 @@ export default function PenilaianForm({ attempt, initialAnswers }: GradingFormPr
                 <div className="flex items-center gap-2">
                   <label className="text-xs font-bold text-slate-700">Skor (0-100):</label>
                   <input
+                    disabled={attempt.status === "graded" ? true : false}
                     type="number"
                     min={0}
                     max={100}
@@ -247,6 +248,7 @@ export default function PenilaianForm({ attempt, initialAnswers }: GradingFormPr
                   Catatan & Evaluasi Dosen (Feedback untuk Siswa)
                 </label>
                 <textarea
+                  disabled={attempt.status === "graded" ? true : false}
                   rows={2}
                   value={item.teacher_feedback || ""}
                   onChange={(e) => handleFeedbackChange(index, e.target.value)}
@@ -266,21 +268,34 @@ export default function PenilaianForm({ attempt, initialAnswers }: GradingFormPr
           <span className="font-bold text-orange-600 text-sm">{calculatedFinalScore()}</span>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => router.push("/admin/penilaian")}
-            className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={handleSaveGrading}
-            className="px-5 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition shadow-md disabled:bg-slate-300 cursor-pointer"
-          >
-            {isSubmitting ? "Menyimpan..." : "Simpan & Publikasi Nilai ✓"}
-          </button>
+          {attempt.status === 'submitted' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => router.push("/admin/penilaian")}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleSaveGrading}
+                className="px-5 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition shadow-md disabled:bg-slate-300 cursor-pointer"
+              >
+                {isSubmitting ? "Menyimpan..." : "Simpan & Publikasi Nilai ✓"}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => router.push("/admin/penilaian")}
+              className="px-4 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition shadow-md disabled:bg-slate-300 cursor-pointer"
+            >
+              Kembali
+            </button>
+          )}
+          
         </div>
       </div>
     </div>

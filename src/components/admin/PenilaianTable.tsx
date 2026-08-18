@@ -145,9 +145,16 @@ export default function PenilaianTable({ initialAttempts }: PenilaianTableProps)
                         <button 
                           type="button" 
                           onClick={() => handleReview(item.id)} 
-                          className="bg-orange-500 text-white py-1.5 px-3 rounded-xl hover:bg-orange-600 transition-colors cursor-pointer font-semibold text-xs shadow-sm"
+                          className={`py-1.5 px-3 rounded-xl font-semibold text-xs shadow-sm border cursor-pointer ${
+                            item.status === 'submitted'
+                              ? 'text-white bg-orange-500 hover:bg-orange-600 transition-colors border-0'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors'
+                          }`}
                         >
-                          Periksa & Nilai
+                          {item.status === 'submitted'
+                            ? "Periksa & Nilai"
+                            : "Sudah Dinilai"
+                          }
                         </button>
                       </td>
                     </tr>

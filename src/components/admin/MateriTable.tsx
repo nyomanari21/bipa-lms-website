@@ -175,10 +175,10 @@ export default function MateriTable({ initialMateri }: MateriTableProps) {
                                     </td>
                                     <td className="px-4 py-3.5 max-w-xs truncate">{item.order_index}</td>
                                     <td className="px-4 py-3.5 flex flex-wrap gap-2">
-                                        <button type="button" onClick={() => handleDeleteData(item.id, item.title, item.image_urls)} className="bg-red-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
+                                        <button type="button" onClick={() => handleDeleteData(item.id, item.title, item.image_urls)} className="bg-red-500 text-white border border-gray-200 py-1 px-2 rounded-xl hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
                                             Hapus
                                         </button>
-                                        <button type="button" onClick={() => handleUpdateData(item.id)} className="bg-yellow-500 text-white border border-gray-200 py-1 px-2 rounded-md hover:bg-yellow-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
+                                        <button type="button" onClick={() => handleUpdateData(item.id)} className="bg-yellow-500 text-white border border-gray-200 py-1 px-2 rounded-xl hover:bg-yellow-600 transition-colors cursor-pointer font-medium text-sm shadow-sm">
                                             Edit
                                         </button>
                                     </td>

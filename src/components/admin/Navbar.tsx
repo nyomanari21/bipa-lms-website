@@ -111,7 +111,7 @@ export default function AdminSidebar() {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Bagian Atas di Dalam Drawer */}
+        {/* Header Drawer */}
         <div className="p-4 border-b border-slate-50 flex items-center justify-between">
           <span className="text-sm font-bold text-slate-800">Menu Manajemen</span>
           <button 
@@ -122,7 +122,7 @@ export default function AdminSidebar() {
           </button>
         </div>
 
-        {/* List Menu di Dalam Drawer Mobile */}
+        {/* List Menu Drawer Mobile */}
         <div className="flex-1 px-3 py-4 overflow-y-auto">
           <ul className="space-y-1">
             {navLinks.map(({ href, label, icon: Icon }) => {
