@@ -12,6 +12,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import LogoutButton from "./LogoutButton";
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -72,7 +73,8 @@ export default function AdminSidebar() {
 
         {/* Footer Kecil Sidebar Admin */}
         <div className="p-4 border-t border-slate-50 text-center">
-          <p className="text-[10px] text-slate-400 font-medium">v1.0 • LMS BIPA Admin Panel</p>
+          <LogoutButton />
+          <p className="text-[10px] text-slate-400 font-medium pt-4">v1.0 • LMS BIPA Admin Panel</p>
         </div>
       </aside>
 
@@ -142,6 +144,11 @@ export default function AdminSidebar() {
               );
             })}
           </ul>
+        </div>
+
+        {/* Logout Button */}
+        <div className="px-3 py-4">
+          <LogoutButton />
         </div>
       </div>
     </>

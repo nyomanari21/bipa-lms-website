@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { url } from 'inspector'
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
@@ -51,6 +52,14 @@ export async function proxy(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
+  // if(pathname.startsWith('/')) {
+  //   if(profile?.role === 'admin'){
+  //     const url = request.nextUrl.clone()
+  //     url.pathname = '/admin'
+  //     return NextResponse.redirect(url)
+  //   }
+  // }
+
   // Blokir akses ke halaman materi dan lempar ke halaman Beranda (/) jika bukan siswa
   if(pathname.startsWith('/materi')) {
     if (!profile || profile.role !== 'student') {
@@ -80,6 +89,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/materi/:path*',
-    '/admin/:path*'
+    '/admin/:path*',
   ],
 }
