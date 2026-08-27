@@ -283,18 +283,15 @@ export default function KuisPage() {
   if (questions.length === 0) return <div className="max-w-3xl mx-auto px-4 py-16 text-center text-slate-400">Belum ada soal latihan untuk bab ini.</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 md:px-6 md:py-10 bg-slate-50 text-slate-800">
-      {quizFinished ? (
-        // Halaman Kuis Selesai
-        <>
-          {/* Halaman Kuis Selesai */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 md:p-10 text-center max-w-lg mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-200">
-            {/* Icon / Badge Status */}
-            <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl shadow-sm border bg-slate-50 border-slate-100">
+    <div className="min-h-screen bg-slate-50/60 text-slate-800 pb-16">
+      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+        {quizFinished ? (
+          /* Halaman Kuis Selesai */
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-8 md:p-10 text-center max-w-lg mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl shadow-2xs border bg-slate-50 border-slate-100">
               {finalStatus === "graded" ? "🏆" : "📝"}
             </div>
 
-            {/* Header Info */}
             <div className="space-y-1.5">
               <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
                 {finalStatus === "graded" ? "Latihan Selesai Dikerjakan!" : "Latihan Berhasil Dikirim!"}
@@ -306,8 +303,7 @@ export default function KuisPage() {
               </p>
             </div>
 
-            {/* Score Box (Hanya muncul jika ada soal yang dinilai otomatis) */}
-            {(finalStatus === "graded" || withMCOrShortAnswer) ? (
+            {finalStatus === "graded" || withMCOrShortAnswer ? (
               <div
                 className={`rounded-2xl p-5 border transition-all ${
                   finalStatus === "graded"
@@ -334,17 +330,15 @@ export default function KuisPage() {
                 </div>
               </div>
             ) : (
-              /* Card Info Ringkas untuk Kuis yang Full Esai / Speaking */
               <div className="rounded-2xl p-4 bg-slate-50 border border-slate-100 text-xs text-slate-600 font-medium">
                 ⏳ Status: <span className="text-orange-600 font-bold">Menunggu Evaluasi Dosen</span>
               </div>
             )}
 
-            {/* Tombol Aksi */}
             <div className="pt-2">
               <button
                 onClick={() => router.push("/materi")}
-                className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white shadow-sm transition cursor-pointer ${
+                className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white shadow-xs transition cursor-pointer ${
                   finalStatus === "graded"
                     ? "bg-emerald-600 hover:bg-emerald-700"
                     : "bg-orange-500 hover:bg-orange-600"
@@ -354,124 +348,214 @@ export default function KuisPage() {
               </button>
             </div>
           </div>
-        </>
-      ) : (
-        // Halaman Pengerjaan Kuis
-        <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-            <div>
-              <span className="text-xs font-bold text-orange-500 uppercase tracking-wider">Evaluasi BIPA</span>
-              <h1 className="text-xl font-extrabold text-slate-900 mt-0.5">Tipe Soal: {currentQuestion.question_type.replace("_", " ").toUpperCase()}</h1>
-            </div>
-            <span className="text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1 rounded-full">Soal {currentQuestionIndex + 1} dari {questions.length}</span>
-          </div>
+        ) : (
+          /* Halaman Pengerjaan Kuis */
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* Header Progress & Tipe Soal */}
+            <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200/60">
+                    {currentQuestion.question_type.replace("_", " ")}
+                  </span>
+                  <h1 className="text-lg md:text-xl font-extrabold text-slate-900 mt-2">
+                    Lembar Evaluasi Mandiri
+                  </h1>
+                </div>
 
-          <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <h3 className="text-base md:text-lg font-bold text-slate-900 leading-relaxed">{currentQuestion.question_text}</h3>
-
-            {/* Pilihan Ganda */}
-            {currentQuestion.question_type === "multiple_choice" && currentQuestion.options && (
-              <div className="grid gap-3">
-                {currentQuestion.options.map((option, idx) => {
-                  const isCurrentSelected = selectedAnswer !== null && Number(selectedAnswer) === idx;
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: idx }))}
-                      className={`w-full p-4 rounded-xl text-left text-sm font-medium transition border flex items-center justify-between cursor-pointer ${
-                        isCurrentSelected
-                          ? "bg-orange-50 border-orange-500 text-orange-900 font-semibold" 
-                          : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                      }`}
-                    >
-                      <span>{option}</span>
-                      {isCurrentSelected && <span className="text-orange-500">✓</span>}
-                    </button>
-                  );
-                })}
+                <div className="text-right">
+                  <span className="text-xs font-black text-slate-700">
+                    Soal {currentQuestionIndex + 1}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-400">
+                    {" "}/ {questions.length}
+                  </span>
+                </div>
               </div>
-            )}
 
-            {/* Isian Singkat */}
-            {currentQuestion.question_type === "short_answer" && (
-              <input
-                type="text"
-                placeholder="Ketik jawaban singkat Anda di sini..."
-                value={selectedAnswer || ""}
-                onChange={(e) => setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: e.target.value }))}
-                className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-500 transition"
-              />
-            )}
+              {/* Visual Progress Bar */}
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-orange-500 h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
 
-            {/* Esai */}
-            {currentQuestion.question_type === "essay" && (
-              <textarea
-                rows={4}
-                placeholder="Tuliskan jawaban penjelasan panjang Anda di sini..."
-                value={selectedAnswer || ""}
-                onChange={(e) => setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: e.target.value }))}
-                className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-500 transition"
-              />
-            )}
+            {/* Kartu Pertanyaan & Area Menjawab */}
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+              <div className="space-y-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Pertanyaan
+                </span>
+                <h2 className="text-base md:text-lg font-bold text-slate-900 leading-relaxed">
+                  {currentQuestion.question_text}
+                </h2>
+              </div>
 
-            {/* Latihan Berbicara */}
-            {currentQuestion.question_type === "speaking" && (
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center gap-4">
-                <p className="text-xs text-slate-400">Klik tombol mikrofon untuk mulai berbicara, klik stop jika sudah selesai.</p>
-                <div className="flex gap-3">
-                  {!isRecording ? (
-                    <button onClick={startRecording} className="bg-red-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 transition flex items-center gap-1 cursor-pointer">
-                      🔴 Mulai Rekam Suara
-                    </button>
-                  ) : (
-                    <button onClick={stopRecording} className="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold animate-pulse flex items-center gap-1 cursor-pointer">
-                      ⏹️ Hentikan Rekaman
-                    </button>
+              {/* Tipe Pilihan Ganda */}
+              {currentQuestion.question_type === "multiple_choice" && currentQuestion.options && (
+                <div className="grid gap-3 pt-2">
+                  {currentQuestion.options.map((option, idx) => {
+                    const isCurrentSelected =
+                      selectedAnswer !== null && Number(selectedAnswer) === idx;
+
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() =>
+                          setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: idx }))
+                        }
+                        className={`w-full p-4 rounded-2xl text-left text-sm font-semibold transition-all border flex items-center justify-between cursor-pointer ${
+                          isCurrentSelected
+                            ? "bg-orange-50/70 border-orange-500 text-orange-950 shadow-2xs ring-1 ring-orange-500"
+                            : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`w-7 h-7 rounded-xl text-xs font-bold flex items-center justify-center border transition-colors ${
+                              isCurrentSelected
+                                ? "bg-orange-500 text-white border-orange-500"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
+                            }`}
+                          >
+                            {String.fromCharCode(65 + idx)}
+                          </span>
+                          <span>{option}</span>
+                        </div>
+
+                        {isCurrentSelected && (
+                          <span className="text-orange-600 font-extrabold text-sm">✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Tipe Isian Singkat */}
+              {currentQuestion.question_type === "short_answer" && (
+                <div className="pt-2">
+                  <input
+                    type="text"
+                    placeholder="Ketik jawaban singkat Anda di sini..."
+                    value={selectedAnswer || ""}
+                    onChange={(e) =>
+                      setUserAnswers((prev) => ({
+                        ...prev,
+                        [currentQuestionIndex]: e.target.value,
+                      }))
+                    }
+                    className="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-medium focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"
+                  />
+                </div>
+              )}
+
+              {/* Tipe Esai */}
+              {currentQuestion.question_type === "essay" && (
+                <div className="pt-2">
+                  <textarea
+                    rows={5}
+                    placeholder="Tuliskan jawaban penjelasan panjang Anda di sini..."
+                    value={selectedAnswer || ""}
+                    onChange={(e) =>
+                      setUserAnswers((prev) => ({
+                        ...prev,
+                        [currentQuestionIndex]: e.target.value,
+                      }))
+                    }
+                    className="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-medium focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"
+                  />
+                </div>
+              )}
+
+              {/* Tipe Latihan Berbicara (Speaking) */}
+              {currentQuestion.question_type === "speaking" && (
+                <div className="p-6 bg-slate-50/70 rounded-2xl border border-slate-200/80 flex flex-col items-center gap-4 text-center">
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-slate-700">Praktik Pelafalan Bahasa</p>
+                    <p className="text-xs text-slate-400">
+                      Klik tombol untuk merekam pelafalan kata/kalimat sesuai instruksi soal.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    {!isRecording ? (
+                      <button
+                        onClick={startRecording}
+                        className="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-2 cursor-pointer"
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                        Mulai Rekam Suara
+                      </button>
+                    ) : (
+                      <button
+                        onClick={stopRecording}
+                        className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold animate-pulse flex items-center gap-2 cursor-pointer shadow-xs"
+                      >
+                        <span>⏹️</span> Hentikan Rekaman
+                      </button>
+                    )}
+                  </div>
+
+                  {selectedAnswer?.localUrl && (
+                    <div className="w-full pt-4 border-t border-slate-200 flex flex-col items-center gap-2">
+                      <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                        ✓ Rekaman Berhasil Disimpan
+                      </span>
+                      <audio src={selectedAnswer.localUrl} controls className="h-9 w-full max-w-sm mt-1" />
+                    </div>
                   )}
                 </div>
-                {selectedAnswer?.localUrl && (
-                  <div className="w-full pt-2 border-t border-slate-200 flex flex-col items-center gap-2">
-                    <span className="text-[10px] text-green-600 font-bold">✓ Rekaman Berhasil Tersimpan Secara Lokal</span>
-                    <audio src={selectedAnswer.localUrl} controls className="h-8 max-w-xs" />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* NAVIGASI KUIS */}
-          <div className="flex justify-between items-center pt-2">
-            <button
-              onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-              disabled={currentQuestionIndex === 0 || isSubmitting}
-              className={`px-5 py-3 rounded-xl font-bold text-sm border transition ${
-                currentQuestionIndex > 0 ? "bg-white border-slate-200 text-slate-700 cursor-pointer" : "bg-slate-100 text-slate-300 cursor-not-allowed opacity-50"
-              }`}
-            >
-              ← Soal Sebelumnya
-            </button>
+            {/* Action Bar Navigasi Kuis */}
+            <div className="flex justify-between items-center pt-2">
+              <button
+                onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
+                disabled={currentQuestionIndex === 0 || isSubmitting}
+                className={`px-5 py-3 rounded-2xl font-bold text-xs border transition ${
+                  currentQuestionIndex > 0
+                    ? "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer shadow-2xs"
+                    : "bg-slate-100 border-transparent text-slate-300 cursor-not-allowed"
+                }`}
+              >
+                ← Soal Sebelumnya
+              </button>
 
-            {currentQuestionIndex + 1 === questions.length ? (
-              <button
-                onClick={handleSubmitQuiz}
-                disabled={selectedAnswer === null || selectedAnswer === "" || isSubmitting}
-                className="px-6 py-3 rounded-xl font-bold text-sm bg-green-600 text-white hover:bg-green-700 transition shadow-md disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
-              >
-                {isSubmitting ? "Mengirim Jawaban..." : "Selesai & Kirim Kuis ✓"}
-              </button>
-            ) : (
-              <button
-                onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
-                disabled={selectedAnswer === null || selectedAnswer === "" || isSubmitting}
-                className="px-6 py-3 rounded-xl font-bold text-sm bg-orange-500 text-white hover:bg-orange-600 transition shadow-md disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
-              >
-                Soal Berikutnya →
-              </button>
-            )}
+              {currentQuestionIndex + 1 === questions.length ? (
+                <button
+                  onClick={handleSubmitQuiz}
+                  disabled={
+                    selectedAnswer === null ||
+                    selectedAnswer === "" ||
+                    isSubmitting
+                  }
+                  className="px-6 py-3 rounded-2xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-md disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none cursor-pointer"
+                >
+                  {isSubmitting ? "Mengirim..." : "Selesai & Kirim Kuis ✓"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
+                  disabled={
+                    selectedAnswer === null ||
+                    selectedAnswer === "" ||
+                    isSubmitting
+                  }
+                  className="px-6 py-3 rounded-2xl font-bold text-xs bg-orange-500 hover:bg-orange-600 text-white transition shadow-md shadow-orange-500/15 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none cursor-pointer"
+                >
+                  Soal Berikutnya →
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

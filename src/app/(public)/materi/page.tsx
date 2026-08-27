@@ -69,7 +69,7 @@ export default function MateriPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 relative pb-16">
-      {/* 1. Header Banner Sinematik Parahyangan */}
+      {/* Header Banner Sinematik Parahyangan */}
       <div className="relative bg-slate-900 text-white overflow-hidden shadow-md">
         {/* Foto Background Hero */}
         <div className="absolute inset-0 z-0">
@@ -80,7 +80,7 @@ export default function MateriPage() {
             priority
             className="object-cover object-center scale-105"
           />
-          {/* Multi-layer Gradient Overlay agar Teks Tajam & Terbaca */}
+          {/* Multi-layer Gradient Overlay */}
           <div className="absolute inset-0 bg-linear-to-r from-slate-950/90 via-slate-950/70 to-orange-950/50 backdrop-blur-[1px]" />
           <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-transparent to-transparent" />
         </div>
@@ -103,7 +103,7 @@ export default function MateriPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 -mt-6 relative z-20 space-y-8">
-        {/* 2. Level Selector Tabs */}
+        {/* Level Selector Tabs */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {bipaLevels.map((lvl) => {
             const isSelected = selectedLevel === lvl.id;
@@ -112,7 +112,7 @@ export default function MateriPage() {
                 key={lvl.id}
                 onClick={() => lvl.active && setSelectedLevel(lvl.id)}
                 disabled={!lvl.active}
-                className={`p-4 rounded-2xl text-left transition-all border flex flex-col justify-between gap-2 cursor-pointer ${
+                className={`p-4 rounded-2xl text-left transition-all border flex flex-col justify-between gap-2 cursor-pointer hover:-translate-y-1.5 duration-300 ${
                   isSelected
                     ? "bg-white border-orange-500 shadow-md ring-2 ring-orange-500/20"
                     : lvl.active
@@ -143,7 +143,7 @@ export default function MateriPage() {
           })}
         </div>
 
-        {/* 3. Ringkasan Info Level Terpilih */}
+        {/* Ringkasan Info Level Terpilih */}
         {currentLevelInfo && (
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -166,7 +166,7 @@ export default function MateriPage() {
           </div>
         )}
 
-        {/* 4. Grid Materi Card / Skeleton Loading */}
+        {/* Grid Materi Card / Skeleton Loading */}
         {loading ? (
           <div className="grid md:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (

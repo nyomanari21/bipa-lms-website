@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-linear-to-b from-orange-50/40 via-white to-slate-50 text-slate-800 relative overflow-hidden">
-      {/* Background Watermark Mega Mendung */}
+      {/* Background Mega Mendung */}
       <div className="absolute top-10 -left-20 w-128 h-128 pointer-events-none opacity-[0.1] select-none rotate-12">
         <Image
           src="/images/mega-mendung-outline-3.png"
@@ -15,7 +15,7 @@ export default function Home() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 space-y-24 relative z-10">
-        {/* 1. HERO SECTION (2-Column Split Hero) */}
+        {/* Hero Section */}
         <div className="grid lg:grid-cols-12 gap-12 items-center">
           {/* Kolom Kiri: Copywriting & CTA */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
@@ -81,16 +81,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Floating Badge Level */}
-              {/* <div className="absolute -bottom-5 -left-4 sm:-left-6 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-100 shadow-xl flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center text-lg font-black shadow-xs">
-                  🍲
-                </div>
-                <div>
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase">Fokus Utama</span>
-                  <span className="text-xs font-black text-slate-800">Kuliner Jawa Barat</span>
-                </div>
-              </div> */}
               <div className="absolute right-3 bottom-2">
                 <p className="text-slate-300 text-xs">commons.wikimedia.org/Thetaran</p>
               </div>
@@ -99,7 +89,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 2. SECTION KURIKULUM BELAJAR */}
+        {/* Section Kurikulum Belajar */}
         <div className="space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -111,7 +101,7 @@ export default function Home() {
           </div>
 
           <div className="max-w-lg mx-auto pt-2">
-            {/* Kartu BIPA 1 (Aktif) */}
+            {/* Kartu BIPA */}
             <div className="group bg-white rounded-3xl border-2 border-orange-500/80 shadow-md p-6 relative overflow-hidden flex flex-col justify-between transition hover:-translate-y-1 duration-200">
               <div className="absolute -right-8 -top-8 w-24 h-24 bg-orange-500/10 rounded-full blur-xl pointer-events-none"></div>
 
@@ -198,7 +188,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 3. METODE & FITUR PEMBELAJARAN */}
+        {/* Metode & Fitur Pembelajaran */}
         <div className="grid md:grid-cols-2 gap-6 pt-6 border-t border-slate-200/80">
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 text-2xl flex items-center justify-center shrink-0">

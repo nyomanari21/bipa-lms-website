@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export default function Masuk() {
   const router = useRouter();
@@ -69,83 +70,133 @@ export default function Masuk() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
-        <button
-          className="cursor-pointer"
-          onClick={() => router.push('/')}
-        >
-          <div className="flex items-center gap-2 text-gray-500 text-sm hover:text-orange-400 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="16" viewBox="0 0 12 24">
-              <path d="M0 0h12v24H0z" fill="none" />
-              <path fill="currentColor" fillRule="evenodd" d="m3.343 12l7.071 7.071L9 20.485l-7.778-7.778a1 1 0 0 1 0-1.414L9 3.515l1.414 1.414z" />
-            </svg>
-            Kembali
-          </div>
-        </button>
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-orange-50/40 via-white to-slate-50 px-4 py-12 relative overflow-hidden text-slate-800">
+      {/* Background Mega Mendung */}
+      <div className="absolute -top-12 -right-12 w-80 h-80 opacity-[0.05] pointer-events-none select-none">
+        <Image
+          src="/images/mega-mendung-outline.png"
+          alt=""
+          fill
+          className="object-contain"
+        />
+      </div>
+      <div className="absolute -bottom-16 -left-16 w-96 h-96 opacity-[0.04] pointer-events-none select-none rotate-180">
+        <Image
+          src="/images/mega-mendung-outline.png"
+          alt=""
+          fill
+          className="object-contain"
+        />
+      </div>
 
-        {/* Header */}
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {isRegister ? "Buat Akun Baru" : "Selamat Datang Kembali"}
-          </h2>
-          <p className="mt-2 text-sm text-slate-500">
+      {/* Main Card */}
+      <div className="max-w-md w-full bg-white p-7 sm:p-9 rounded-3xl border border-slate-200/80 shadow-xl shadow-orange-500/5 relative z-10 space-y-6">
+        {/* Top Header */}
+        <div className="flex items-center justify-between">
+          <button
+            className="p-2 rounded-xl bg-slate-100 hover:bg-orange-50 hover:text-orange-600 text-slate-600 transition cursor-pointer text-xs font-bold flex items-center gap-1.5"
+            onClick={() => router.push("/")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            <span>Beranda</span>
+          </button>
+
+          <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-200/60 px-2.5 py-1 rounded-full">
+            <div className="w-12 h-4 relative">
+              <Image
+                src="/images/logo-upi.png"
+                alt="Batik Icon"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-[10px] font-black tracking-wider text-orange-600 uppercase">
+              BIPA RAGA
+            </span>
+          </div>
+        </div>
+
+        {/* Judul & Copywriting */}
+        <div className="text-center space-y-1.5 pt-1">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            {isRegister ? "Buat Akun Baru" : "Wilujeng Sumping!"}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
             {isRegister
-              ? "Daftar untuk mulai belajar bahasa & budaya Indonesia"
-              : "Masuk untuk melanjutkan pembelajaran BIPA Anda"}
+              ? "Daftar untuk mulai belajar bahasa & gastronomi Sunda"
+              : "Masuk untuk melanjutkan pembelajaran dan latihan evaluasi Anda"}
           </p>
         </div>
 
-        {/* Notifikasi Message */}
+        {/* Notifikasi */}
         {message && (
           <div
-            className={`p-4 rounded-xl text-xs font-semibold border ${
+            className={`p-3.5 rounded-2xl text-xs font-bold border flex items-center gap-2 ${
               message.type === "success"
-                ? "bg-green-50 border-green-100 text-green-700"
-                : "bg-red-50 border-red-100 text-red-700"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                : "bg-rose-50 border-rose-200 text-rose-700"
             }`}
           >
-            {message.text}
+            <span>{message.type === "success" ? "✓" : "⚠️"}</span>
+            <span>{message.text}</span>
           </div>
         )}
 
-        {/* Form */}
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+        {/* Kolom Form */}
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {isRegister && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                Nama Lengkap
+              </label>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Masukkan nama lengkap Anda"
-                className="w-full p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-500 transition"
+                placeholder="Contoh: Nyoman Ari"
+                className="w-full p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 text-sm font-medium focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+              Alamat Email
+            </label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="nama@email.com"
-              className="w-full p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-500 transition"
+              className="w-full p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 text-sm font-medium focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+              Kata Sandi
+            </label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-500 transition"
+              placeholder="Minimal 6 karakter"
+              className="w-full p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 text-sm font-medium focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"
             />
           </div>
 
@@ -153,17 +204,26 @@ export default function Masuk() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3.5 rounded-xl font-bold text-sm text-white shadow-md transition mt-2 ${
+            className={`w-full py-3.5 rounded-2xl font-bold text-sm text-white shadow-md transition-all cursor-pointer mt-2 ${
               loading
-                ? "bg-slate-300 cursor-not-allowed"
-                : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/10 cursor-pointer"
+                ? "bg-slate-300 cursor-not-allowed shadow-none"
+                : "bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-500/20 active:scale-[0.99]"
             }`}
           >
-            {loading ? "Memproses..." : isRegister ? "Daftar Akun" : "Masuk Aplikasi"}
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Memproses...
+              </span>
+            ) : isRegister ? (
+              "Daftar Akun BIPA Sekarang →"
+            ) : (
+              "Masuk ke Aplikasi →"
+            )}
           </button>
         </form>
 
-        {/* Toggle Login / Register */}
+        {/* Tombol Switch Login/Register */}
         <div className="text-center pt-2 border-t border-slate-100">
           <button
             type="button"
@@ -171,7 +231,7 @@ export default function Masuk() {
               setIsRegister(!isRegister);
               setMessage(null);
             }}
-            className="text-xs font-bold text-orange-500 hover:text-orange-600 transition cursor-pointer"
+            className="text-xs font-bold text-orange-600 hover:text-orange-700 transition cursor-pointer"
           >
             {isRegister
               ? "Sudah punya akun? Masuk di sini"

@@ -96,7 +96,7 @@ export default function Navbar() {
     router.refresh();
   };
 
-  // Helper untuk mengambil inisial nama (contoh: Nyoman Ari -> NA)
+  // Helper untuk mengambil inisial nama
   const getInitials = (fullName: string) => {
     return fullName
       .split(" ")
@@ -108,7 +108,7 @@ export default function Navbar() {
 
   return (
     <nav className="min-w-full bg-white/95 backdrop-blur-md border-b border-orange-100/80 sticky top-0 z-50 shadow-xs relative">
-      {/* Subtle Watermark Mega Mendung Background */}
+      {/* Background Mega Mendung */}
       <div className="absolute right-0 top-0 h-full w-[100%] pointer-events-none opacity-[0.1] select-none md:flex overflow-hidden">
         {[1, 2, 3].map((item) => (
           <div key={item} className="relative h-full flex-1">
@@ -127,7 +127,7 @@ export default function Navbar() {
       <div className="max-w-6xl m-auto px-4 h-16 flex items-center justify-between relative z-10">
         <div className="hidden md:flex items-center justify-between w-full h-full">
           {/* Logo Beraksen Mega Mendung */}
-          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer hover:scale-105 transition-transform duration-200">
+          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer hover:scale-103 transition-transform duration-300">
             <div className="relative w-32 h-16 rounded-xl flex items-center justify-center p-1">
               <Image
                 src="/images/logo-upi.png"
@@ -158,7 +158,7 @@ export default function Navbar() {
                       href={href}
                       className={`relative px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                         isActive
-                          ? "text-orange-600 bg-orange-50/80"
+                          ? "text-orange-600 bg-orange-50"
                           : "text-slate-600 hover:text-orange-600 hover:bg-slate-50"
                       }`}
                     >
