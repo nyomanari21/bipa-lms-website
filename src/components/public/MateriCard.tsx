@@ -21,9 +21,9 @@ export default function MateriCard({ material }: MaterialCardProps) {
       className="group relative bg-white rounded-3xl border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-orange-400/80 p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 overflow-hidden cursor-pointer"
     >
       {/* Watermark Mega Mendung di Sudut Kartu */}
-      <div className="absolute -right-6 -bottom-6 w-32 h-32 opacity-[0.04] group-hover:opacity-[0.12] transition-opacity duration-300 pointer-events-none select-none">
+      <div className="absolute -right-6 -bottom-6 w-64 h-64 opacity-[0.05] group-hover:opacity-[0.15] transition-opacity duration-300 pointer-events-none select-none">
         <Image
-          src="/images/mega-mendung-outline.png"
+          src="/images/mega-mendung-outline-3.png"
           alt=""
           fill
           className="object-contain"
