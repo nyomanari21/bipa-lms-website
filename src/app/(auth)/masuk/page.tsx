@@ -36,35 +36,47 @@ function AuthForm() {
 
     try {
       if (isRegister) {
-        // Register Siswa Baru
-        const { data, error } = await supabase.auth.signUp({
+        // Daftar Akun
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { name: fullName },
+            data: {
+              full_name: fullName,
+              role: "student", // Default role sebagai mahasiswa
+            },
           },
         });
+
         if (error) throw error;
-        setMessage({
-          type: "success",
-          text: "Pendaftaran berhasil! Silakan masuk dengan akun Anda.",
-        });
-        setIsRegister(false);
+        setMessage({ type: "success", text: "Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi." });
       } else {
-        // Login Akun
-        const { data, error } = await supabase.auth.signInWithPassword({
+        // Masuk Akun
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+
         if (error) throw error;
-        router.push("/materi");
+        
+        // Jika sukses login, arahkan ke halaman utama materi
+        const { data: { user } } = await supabase.auth.getUser()
+        const { data: profile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user?.id)
+          .single()
+        
+        if (profile?.role === "student") {
+          router.push("/");
+        }
+        else if (profile?.role === "admin") {
+          router.push("/admin");
+        }
         router.refresh();
       }
     } catch (err: any) {
-      setMessage({
-        type: "error",
-        text: err.message || "Terjadi kesalahan. Silakan coba lagi.",
-      });
+      setMessage({ type: "error", text: err.message || "Terjadi kesalahan, silakan coba lagi." });
     } finally {
       setLoading(false);
     }
