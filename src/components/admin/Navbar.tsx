@@ -17,7 +17,7 @@ import LogoutButton from "./LogoutButton";
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/materi", label: "Kelola Materi", icon: BookText },
-  { href: "/admin/kuis", label: "Kelola Soal & Kuis", icon: NotebookPen },
+  { href: "/admin/kuis", label: "Kelola Soal Kuis", icon: NotebookPen },
   { href: "/admin/penilaian", label: "Penilaian Siswa", icon: ChartSpline },
 ];
 

@@ -333,7 +333,7 @@ export default function ImportExcelModal({
               disabled={isLoading || !file}
               className="cursor-pointer px-4 py-2 rounded-xl bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition disabled:bg-slate-300"
             >
-              {isLoading ? "Mengunggah..." : "Mulai Import Data"}
+              {isLoading ? "Mengunggah..." : "Mulai Impor Data"}
             </button>
           </div>
         </div>

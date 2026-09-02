@@ -46,9 +46,6 @@ export default function MateriCard({ material }: MaterialCardProps) {
           <h3 className="font-extrabold text-base sm:text-lg text-slate-900 group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
             {material.title}
           </h3>
-          <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">
-            Pelajari kosakata bahan, tata bahasa, dan percakapan kontekstual kuliner Sunda.
-          </p>
         </div>
       </div>
 

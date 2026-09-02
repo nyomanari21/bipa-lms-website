@@ -38,7 +38,7 @@ export default async function AdminDashboardPage() {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-          <span className="text-xs font-bold text-slate-400 uppercase">Total Mahasiswa</span>
+          <span className="text-xs font-bold text-slate-400 uppercase">Total Siswa</span>
           <p className="text-3xl font-black text-slate-800 mt-2">{totalStudents || 0}</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">

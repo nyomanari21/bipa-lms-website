@@ -84,6 +84,16 @@ function AuthForm() {
 
   return (
     <div className="max-w-md w-full bg-white p-7 sm:p-9 rounded-3xl border border-slate-200/80 shadow-xl shadow-orange-500/5 relative z-10 space-y-6">
+      {/* Watermark Mega Mendung di Sudut Kartu */}
+      <div className="absolute right-4 top-6 w-64 h-64 opacity-[0.08] -rotate-12 pointer-events-none select-none overflow-hidden">
+        <Image
+          src="/images/mega-mendung-outline-3.png"
+          alt=""
+          fill
+          className="object-contain"
+        />
+      </div>
+      
       {/* Header Form */}
       <div className="flex items-center justify-between">
         <button
@@ -175,7 +185,7 @@ function AuthForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Minimal 6 karakter"
+            placeholder="Kata sandi"
             className="w-full p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 text-sm font-medium focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"
           />
         </div>

@@ -10,7 +10,7 @@ const bipaLevels = [
     id: 1, 
     name: "BIPA 1", 
     level: "Tingkat Dasar",
-    theme: "Wisata Gastronomi Bandung", 
+    theme: "Gastronomi Kota Bandung", 
     desc: "Mempelajari kosakata dasar, ekspresi percakapan harian, dan pemesanan makanan khas Sunda.",
     active: true 
   },
@@ -155,7 +155,7 @@ export default function MateriPage() {
                   {currentLevelInfo.name}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">{currentLevelInfo.desc}</p>
+              {/* <p className="text-xs text-slate-500 mt-1">{currentLevelInfo.desc}</p> */}
             </div>
             <div className="text-left sm:text-right shrink-0">
               <span className="text-[11px] font-bold uppercase text-slate-400 block">Total Modul</span>

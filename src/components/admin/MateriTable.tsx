@@ -134,7 +134,7 @@ export default function MateriTable({ initialMateri }: MateriTableProps) {
                     onClick={handleCreateData}
                     className="w-fit bg-green-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl hover:bg-green-600 transition-colors cursor-pointer shadow-sm"
                 >
-                    Tambah Data
+                    + Tambah Data
                 </button>
             </div>
 

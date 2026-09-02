@@ -196,7 +196,7 @@ export default function DetailMateriPage() {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-emerald-700 font-bold text-base">
-                    ✓ Latihan Telah Selesai
+                    ✓ Kuis Telah Selesai
                   </span>
                   <span
                     className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md tracking-wider ${
@@ -247,14 +247,14 @@ export default function DetailMateriPage() {
                   Sudah Paham dengan Materi Ini?
                 </h4>
                 <p className="text-xs text-orange-600 mt-0.5">
-                  Uji kemampuan Bahasa Indonesia-mu lewat latihan soal di akhir bab.
+                  Uji kemampuan Bahasa Indonesia-mu lewat kuis di akhir bab.
                 </p>
               </div>
               <button
                 onClick={() => router.push(`/materi/${material.slug}/kuis`)}
                 className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer"
               >
-                Mulai Latihan Soal &rarr;
+                Mulai Kuis &rarr;
               </button>
             </div>
           )}
