@@ -5,32 +5,11 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import MateriCard from "@/components/public/MateriCard";
 
-const bipaLevels = [
-  { 
-    id: 1, 
-    name: "BIPA 1", 
-    level: "Tingkat Dasar",
-    theme: "Gastronomi Kota Bandung", 
-    desc: "Mempelajari kosakata dasar, ekspresi percakapan harian, dan pemesanan makanan khas Sunda.",
-    active: true 
-  },
-  // { 
-  //   id: 2, 
-  //   name: "BIPA 2", 
-  //   level: "Tingkat Lanjutan",
-  //   theme: "Tradisi & Seni Priangan", 
-  //   desc: "Percakapan formal, etika bertamu, dan ragam alat musik tradisional.",
-  //   active: false 
-  // },
-  // { 
-  //   id: 3, 
-  //   name: "BIPA 3", 
-  //   level: "Tingkat Mahir",
-  //   theme: "Sastra & Cerita Rakyat", 
-  //   desc: "Struktur kalimat naratif kompleks dan penulisan esai apresiasi budaya.",
-  //   active: false 
-  // },
-];
+interface BipaLevel {
+  id: number;
+  level_name: string;
+  theme: string;
+}
 
 interface Material {
   id: string;
@@ -40,26 +19,52 @@ interface Material {
 }
 
 export default function MateriPage() {
-  const [selectedLevel, setSelectedLevel] = useState(1);
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [bipaLevels, setBipaLevels] = useState<BipaLevel[]>([]);
+  const [loadingLevels, setLoadingLevels] = useState(true);
+  const [loadingMaterials, setLoadingMaterials] = useState(false);
+
+  // Ambil data level BIPA dari Supabase
+  useEffect(() => {
+    async function fetchBipaLevels() {
+      setLoadingLevels(true);
+      const { data: bipaData, error: bipaError } = await supabase
+        .from("bipa_levels")
+        .select("id, level_name, theme")
+        .order("id", { ascending: true });
+
+      if (bipaError) {
+        console.error("Gagal mengambil data level BIPA:", bipaError.message);
+      } else if (bipaData && bipaData.length > 0) {
+        setBipaLevels(bipaData);
+        // Set default level BIPA ke data pertama jika belum ada yang dipilih
+        setSelectedLevel(bipaData[0].id);
+      }
+      setLoadingLevels(false);
+    }
+
+    fetchBipaLevels();
+  }, []);
 
   // Ambil data materi dari Supabase
   useEffect(() => {
     async function fetchMaterials() {
-      setLoading(true);
-      const { data, error } = await supabase
+      if (!selectedLevel) return;
+
+      setLoadingMaterials(true);
+      const { data: materialData, error: materialError } = await supabase
         .from("materials")
         .select("id, title, slug, bipa_level_id")
         .eq("bipa_level_id", selectedLevel)
         .order("order_index", { ascending: true });
 
-      if (error) {
-        console.error("Gagal mengambil data materi:", error.message);
-      } else if (data) {
-        setMaterials(data);
+      if (materialError) {
+        console.error("Gagal mengambil data materi:", materialError.message);
+      } else if (materialData) {
+        setMaterials(materialData);
       }
-      setLoading(false);
+      setLoadingMaterials(false);
     }
 
     fetchMaterials();
@@ -103,45 +108,52 @@ export default function MateriPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 -mt-6 relative z-20 space-y-8">
-        {/* Level Selector Tabs */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {bipaLevels.map((lvl) => {
-            const isSelected = selectedLevel === lvl.id;
-            return (
-              <button
-                key={lvl.id}
-                onClick={() => lvl.active && setSelectedLevel(lvl.id)}
-                disabled={!lvl.active}
-                className={`p-4 rounded-2xl text-left transition-all border flex flex-col justify-between gap-2 cursor-pointer hover:-translate-y-1.5 duration-300 ${
-                  isSelected
-                    ? "bg-white border-orange-500 shadow-md ring-2 ring-orange-500/20"
-                    : lvl.active
-                    ? "bg-white/90 border-slate-200 hover:border-orange-300 hover:bg-white shadow-xs"
-                    : "bg-slate-100/70 border-slate-200 opacity-60 cursor-not-allowed"
-                }`}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span className={`text-xs font-extrabold uppercase tracking-wider ${
-                    isSelected ? "text-orange-600" : "text-slate-500"
-                  }`}>
-                    {lvl.name}
-                  </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    lvl.active 
-                      ? isSelected ? "bg-orange-500 text-white" : "bg-emerald-50 text-emerald-700 border border-emerald-200" 
-                      : "bg-slate-200 text-slate-500"
-                  }`}>
-                    {lvl.active ? (isSelected ? "Aktif" : "Tersedia") : "Segera"}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-800">{lvl.level}</h3>
-                  <p className="text-xs text-slate-500 line-clamp-1">{lvl.theme}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {/* Tab Pemilihan Level BIPA */}
+        {loadingLevels ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="h-20 bg-white rounded-2xl border border-slate-200 animate-pulse p-4 space-y-2">
+                <div className="w-1/3 h-4 bg-slate-200 rounded-md"></div>
+                <div className="w-2/3 h-3 bg-slate-100 rounded-md"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {bipaLevels.map((lvl) => {
+              const isSelected = selectedLevel === lvl.id;
+
+              return (
+                <button
+                  key={lvl.id}
+                  onClick={() => setSelectedLevel(lvl.id)}
+                  className={`p-4 rounded-2xl text-left transition-all border flex flex-col justify-between gap-2 cursor-pointer hover:-translate-y-1.5 duration-300 ${
+                    isSelected
+                      ? "bg-white border-orange-500 shadow-md ring-2 ring-orange-500/20"
+                      : "bg-white/90 border-slate-200 hover:border-orange-300 hover:bg-white shadow-xs"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className={`text-xs font-extrabold uppercase tracking-wider ${
+                      isSelected ? "text-orange-600" : "text-slate-500"
+                    }`}>
+                      {lvl.level_name}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                      isSelected ? "bg-orange-500 text-white" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    }`}>
+                      {isSelected ? "Aktif" : "Tersedia"}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800">{lvl.level_name}</h3>
+                    <p className="text-xs text-slate-500 line-clamp-1">{lvl.theme}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Ringkasan Info Level Terpilih */}
         {currentLevelInfo && (
@@ -152,22 +164,21 @@ export default function MateriPage() {
                   Tema: {currentLevelInfo.theme}
                 </span>
                 <span className="text-xs bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-md">
-                  {currentLevelInfo.name}
+                  {currentLevelInfo.level_name}
                 </span>
               </div>
-              {/* <p className="text-xs text-slate-500 mt-1">{currentLevelInfo.desc}</p> */}
             </div>
             <div className="text-left sm:text-right shrink-0">
               <span className="text-[11px] font-bold uppercase text-slate-400 block">Total Modul</span>
               <span className="text-base font-black text-orange-600">
-                {loading ? "..." : `${materials.length} Bab Materi`}
+                {loadingMaterials ? "..." : `${materials.length} Bab Materi`}
               </span>
             </div>
           </div>
         )}
 
         {/* Grid Materi Card / Skeleton Loading */}
-        {loading ? (
+        {loadingMaterials ? (
           <div className="grid md:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
               <div key={n} className="bg-white p-6 rounded-3xl border border-slate-200 space-y-4 animate-pulse">
