@@ -167,6 +167,16 @@ export default function Navbar() {
                   </li>
                 );
               })}
+              {user && profile?.role === "admin" && (
+                <li>
+                  <Link
+                    href="/admin"
+                    className="relative px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-orange-600 hover:bg-slate-50 transition-all"
+                  >
+                    Dashboard Admin
+                  </Link>
+                </li>
+              )}
             </ul>
 
             {/* Profile / Login Button */}
