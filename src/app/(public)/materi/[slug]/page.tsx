@@ -30,6 +30,7 @@ export default function DetailMateriPage() {
 
   const [material, setMaterial] = useState<MaterialDetail | null>(null);
   const [quizId, setQuizId] = useState<{ id: string } | null>(null);
+  const [questionsAvailable, setQuestionsAvailable] = useState(false);
   const [attempt, setAttempt] = useState<QuizAttemptDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -58,27 +59,44 @@ export default function DetailMateriPage() {
         .eq("material_id", materialData?.id)
         .single();
         
+      if (quizError) {
+        console.error("Gagal mengambil data kuis:", quizError.message);
+      }
+
       if (quizData) {
-        setQuizId(quizData);
+        setQuizId(quizData.id);
 
-        // Jika ada data kuis dari materi yang terkait, cek apakah siswa sudah pernah mengerjakan kuis
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const { data: userQuizAttempt, error: attemptError } = await supabase
-            .from("student_quiz_attempts")
-            .select("id, final_score, status, attempted_at")
-            .match({
-              student_id: session.user.id,
-              quiz_id: quizData?.id
-            })
-            .maybeSingle();
+        // Cek apakah kuis memiliki pertanyaan
+        const { data: questionsData, error: questionsError } = await supabase
+          .from("questions")
+          .select("id")
+          .eq("quiz_id", quizData.id);
 
-            console.log('data attempt:', userQuizAttempt);
+        if (questionsError) {
+          console.error("Gagal mengambil data pertanyaan:", questionsError.message);
+        }
 
-          if (userQuizAttempt) {
-            setAttempt(userQuizAttempt);
+        if (questionsData && questionsData.length > 0) {
+          setQuestionsAvailable(true);
+
+          // Jika ada pertanyaan dari kuis yang terkait, cek apakah siswa sudah pernah mengerjakan kuis
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const { data: userQuizAttempt, error: attemptError } = await supabase
+              .from("student_quiz_attempts")
+              .select("id, final_score, status, attempted_at")
+              .match({
+                student_id: session.user.id,
+                quiz_id: quizData?.id
+              })
+              .maybeSingle();
+  
+            if (userQuizAttempt) {
+              setAttempt(userQuizAttempt);
+            }
           }
         }
+
       }
       
       setLoading(false);
@@ -187,7 +205,7 @@ export default function DetailMateriPage() {
       </div>
 
       {/* Section Evaluasi / Kuis Materi */}
-      {quizId && (
+      {quizId && questionsAvailable && (
         <>
           {attempt ? (
             /* Jika Sudah Mengerjakan */

@@ -209,7 +209,7 @@ export default function MateriForm({ bipaLevelData, initialData }: MateriFormPro
           .insert([
             {
               material_id: newMaterial.id,
-              title: `Evaluasi ${newMaterial.title}`,
+              title: `${newMaterial.title}`,
             },
           ]);
 
