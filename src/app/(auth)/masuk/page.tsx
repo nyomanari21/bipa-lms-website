@@ -59,7 +59,7 @@ function AuthForm() {
 
         if (error) throw error;
         
-        // Jika sukses login, arahkan ke halaman utama materi
+        // Cek role user yang login dan arahkan ke halaman sesuai role
         const { data: { user } } = await supabase.auth.getUser()
         const { data: profile } = await supabase
           .from('users')
@@ -68,9 +68,11 @@ function AuthForm() {
           .single()
         
         if (profile?.role === "student") {
+          router.refresh();
           router.push("/");
         }
         else if (profile?.role === "admin") {
+          router.refresh();
           router.push("/admin");
         }
         router.refresh();
