@@ -26,18 +26,24 @@ interface MaterialData {
   order_index: number;
 }
 
+interface BipaLevelData {
+  id: string;
+  level_name: string;
+}
+
 interface MateriFormProps {
+  bipaLevelData: BipaLevelData[];
   initialData?: MaterialData;
 }
 
-export default function MateriForm({ initialData }: MateriFormProps) {
+export default function MateriForm({ bipaLevelData, initialData }: MateriFormProps) {
   const router = useRouter();
   const quillRef = useRef<any>(null);
   const isUpdate = Boolean(initialData);
 
   // Form State
   const [formData, setFormData] = useState({
-    bipa_level_id: initialData?.bipa_level_id || 1,
+    bipa_level_id: initialData?.bipa_level_id || bipaLevelData[0].id,
     title: initialData?.title || "",
     embed_media_urls: initialData?.embed_media_urls || "",
     order_index: initialData?.order_index || 1,
@@ -183,7 +189,7 @@ export default function MateriForm({ initialData }: MateriFormProps) {
         const { error: quizUpdateError } = await supabase
           .from("quizzes")
           .update({
-            title: `Evaluasi ${formData.title}`,
+            title: `${formData.title}`,
           })
           .eq("material_id", initialData.id);
 
@@ -237,7 +243,9 @@ export default function MateriForm({ initialData }: MateriFormProps) {
               onChange={handleInputChange}
               className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500"
             >
-              <option value={1}>BIPA 1</option>
+              {bipaLevelData.map((level) => (
+                <option key={level.id} value={level.id}>{level.level_name}</option>
+              ))}
             </select>
           </div>
 

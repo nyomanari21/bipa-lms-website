@@ -129,7 +129,7 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-              Pilih Kuis / Bab Materi
+              Pilih Modul Materi
             </label>
             <select
               value={quizId}

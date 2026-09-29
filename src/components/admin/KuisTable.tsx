@@ -150,7 +150,7 @@ export default function KuisTable({ quizzes, initialQuestions }: QuestionsTableP
                       <thead className="text-xs font-bold text-gray-700 uppercase bg-gray-50/70 border-b border-gray-100">
                           <tr>
                               <th className="px-4 py-3 text-center w-12">No</th>
-                              <th className="px-4 py-3">Judul Kuis</th>
+                              <th className="px-4 py-3">Modul Materi</th>
                               <th className="px-4 py-3">Pertanyaan</th>
                               <th className="px-4 py-3">Opsi</th>
                               <th className="px-4 py-3">Jawaban</th>

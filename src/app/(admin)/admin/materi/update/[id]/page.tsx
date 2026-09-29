@@ -11,7 +11,16 @@ export default async function UpdateMateriPage({
     
     const { id } = await params;
 
-    const { data: material, error } = await supabase
+    const { data: bipa_levels, error: bipaError } = await supabase
+        .from('bipa_levels')
+        .select('id, level_name')
+        .order('id', { ascending: true })
+
+    if (bipaError) {
+        return <div className="p-10">Gagal ambil data: {bipaError.message}</div>
+    }
+
+    const { data: material, error: materialError } = await supabase
         .from('materials')
         .select(`
             id,
@@ -26,8 +35,8 @@ export default async function UpdateMateriPage({
         .eq('id', id)
         .maybeSingle()
     
-    if (error) {
-        return <div className="p-10">Gagal ambil data: {error.message}</div>
+    if (materialError) {
+        return <div className="p-10">Gagal ambil data: {materialError.message}</div>
     }
 
     if (!material) {
@@ -45,7 +54,7 @@ export default async function UpdateMateriPage({
             </div>
 
             {/* Create Form */}
-            <MateriForm initialData={material}  />
+            <MateriForm bipaLevelData={bipa_levels} initialData={material}  />
         </div>
     );
 }
