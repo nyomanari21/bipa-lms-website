@@ -69,11 +69,11 @@ function AuthForm() {
         
         if (profile?.role === "student") {
           router.refresh();
-          router.push("/");
+          window.location.href = '/'; // Arahkan ke halaman beranda untuk siswa
         }
         else if (profile?.role === "admin") {
           router.refresh();
-          router.push("/admin");
+          window.location.href = '/admin'; // Arahkan ke halaman dashboard untuk admin
         }
         router.refresh();
       }

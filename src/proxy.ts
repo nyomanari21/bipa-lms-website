@@ -52,14 +52,6 @@ export async function proxy(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  // if(pathname.startsWith('/')) {
-  //   if(profile?.role === 'admin'){
-  //     const url = request.nextUrl.clone()
-  //     url.pathname = '/admin'
-  //     return NextResponse.redirect(url)
-  //   }
-  // }
-
   // Blokir akses ke halaman materi dan lempar ke halaman Beranda (/) jika bukan siswa
   if(pathname.startsWith('/materi')) {
     if (!profile || profile.role !== 'student') {
