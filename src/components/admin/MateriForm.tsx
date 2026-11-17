@@ -148,11 +148,14 @@ export default function MateriForm({ bipaLevelData, initialData }: MateriFormPro
     try {
       const slug = generateSlug(formData.title);
 
+      // Membersihkan non-breaking space menjadi spasi normal
+      const cleanContentText = contentText.replace(/&nbsp;/g, " ");
+
       const payload = {
         bipa_level_id: Number(formData.bipa_level_id),
         title: formData.title,
         slug: slug,
-        content_text: contentText,
+        content_text: cleanContentText,
         image_urls: uploadedImageUrls.length > 0 ? uploadedImageUrls : null,
         embed_media_urls: formData.embed_media_urls || null,
         order_index: Number(formData.order_index),

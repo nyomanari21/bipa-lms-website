@@ -188,21 +188,37 @@ export default function DetailMateriPage() {
       )}
 
       {/* Konten Materi (Render HTML Rich Text Editor dari Supabase) */}
-      <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-10 overflow-hidden">
-        <div 
-          className="prose max-w-none text-sm md:text-base leading-relaxed text-slate-700 wrap-break-word
-                    [&_p]:mb-4 [&_p]:min-h-4
-                    [&_h1]:text-2xl [&_h1]:font-extrabold [&_h1]:text-slate-900 [&_h1]:mt-6 [&_h1]:mb-3
-                    [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h2]:mb-2.5
-                    [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2
-                    [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-3
-                    [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-3
-                    [&_li]:mb-1
-                    [&_img]:rounded-xl [&_img]:my-4 [&_img]:max-h-112.5 [&_img]:w-auto [&_img]:object-cover
-                    [&_blockquote]:border-l-4 [&_blockquote]:border-orange-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-slate-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg"
-          dangerouslySetInnerHTML={{ __html: material.content_text }}
-        />
-      </div>
+      {(() => {
+        const cleanedHtml = (material.content_text || "")
+          // Ubah &nbsp; bawaan copy-paste Word menjadi spasi normal agar kata tidak terpotong di tengah
+          .replace(/&nbsp;/g, " ")
+          // Ganti tanda hubung biasa (-) atau en-dash (–) di antara angka/kata (misal 09.00-21.00 atau ke-18) 
+          // dengan non-breaking hyphen (&#8209;) agar tidak turun baris setelah tanda strip
+          .replace(/(\w)[-–](\w)/g, "$1&#8209;$2");
+
+        return (
+          <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-10 overflow-hidden">
+            <div
+              className="prose max-w-none text-sm md:text-base leading-relaxed text-slate-700 
+                        break-normal whitespace-normal [word-break:normal] [wrap-break-word]
+                        [&_p]:mb-4 [&_p]:min-h-4 [&_p]:break-normal [&_p]:[word-break:normal]
+                        [&_span]:break-normal [&_span]:[word-break:normal]
+                        [&_h1]:text-2xl [&_h1]:font-extrabold [&_h1]:text-slate-900 [&_h1]:mt-6 [&_h1]:mb-3
+                        [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h2]:mb-2.5
+                        [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2
+                        [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-3
+                        [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-3
+                        [&_li]:mb-1
+                        [&_img]:rounded-xl [&_img]:my-4 [&_img]:max-h-112.5 [&_img]:w-auto [&_img]:object-cover
+                        [&_blockquote]:border-l-4 [&_blockquote]:border-orange-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-slate-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg
+                        [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
+                        [&_th]:border [&_th]:border-slate-300 [&_th]:p-2.5 [&_th]:text-left
+                        [&_td]:border [&_td]:border-slate-300 [&_td]:p-2.5"
+              dangerouslySetInnerHTML={{ __html: cleanedHtml }}
+            />
+          </div>
+        );
+      })()}
 
       {/* Section Evaluasi / Kuis Materi */}
       {quizId && questionsAvailable && (
