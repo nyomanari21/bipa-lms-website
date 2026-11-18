@@ -24,3 +24,33 @@ body {
   color: #1e293b;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Styling Render Konten React Quill */
+.quill-content .ql-align-center {
+  text-align: center !important;
+}
+
+.quill-content .ql-align-right {
+  text-align: right !important;
+}
+
+.quill-content .ql-align-justify {
+  text-align: justify !important;
+}
+
+/* Indentation Level 1 sampai 8 */
+.quill-content .ql-indent-1 { padding-left: 3em !important; }
+.quill-content .ql-indent-2 { padding-left: 6em !important; }
+.quill-content .ql-indent-3 { padding-left: 9em !important; }
+.quill-content .ql-indent-4 { padding-left: 12em !important; }
+.quill-content .ql-indent-5 { padding-left: 15em !important; }
+.quill-content .ql-indent-6 { padding-left: 18em !important; }
+.quill-content .ql-indent-7 { padding-left: 21em !important; }
+.quill-content .ql-indent-8 { padding-left: 24em !important; }
+
+/* Highlight / Background Color untuk span maupun mark */
+.quill-content span[style*="background-color"],
+.quill-content mark[style*="background-color"] {
+  padding: 0.1em 0.25em;
+  border-radius: 0.2rem;
+}

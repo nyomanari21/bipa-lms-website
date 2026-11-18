@@ -1,7 +1,7 @@
 // src/app/(public)/materi/[slug]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -33,6 +33,7 @@ export default function DetailMateriPage() {
   const [questionsAvailable, setQuestionsAvailable] = useState(false);
   const [attempt, setAttempt] = useState<QuizAttemptDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchMaterialDetail() {
@@ -106,6 +107,22 @@ export default function DetailMateriPage() {
       fetchMaterialDetail();
     }
   }, [slug]);
+
+  useEffect(() => {
+    const contentElement = contentRef.current;
+    if (!contentElement) return;
+
+    const walker = document.createTreeWalker(contentElement, NodeFilter.SHOW_TEXT);
+    let textNode: Node | null;
+
+    while ((textNode = walker.nextNode())) {
+      if (!textNode.nodeValue) continue;
+
+      textNode.nodeValue = textNode.nodeValue
+        .replace(/\u00a0/g, " ")
+        .replace(/(\w)[-–](\w)/g, "$1\u2011$2");
+    }
+  }, [material?.content_text]);
 
   // Ambil ID video dari link youtube
   function getYouTubeId(url: string) {
@@ -189,17 +206,11 @@ export default function DetailMateriPage() {
 
       {/* Konten Materi (Render HTML Rich Text Editor dari Supabase) */}
       {(() => {
-        const cleanedHtml = (material.content_text || "")
-          // Ubah &nbsp; bawaan copy-paste Word menjadi spasi normal agar kata tidak terpotong di tengah
-          .replace(/&nbsp;/g, " ")
-          // Ganti tanda hubung biasa (-) atau en-dash (–) di antara angka/kata (misal 09.00-21.00 atau ke-18) 
-          // dengan non-breaking hyphen (&#8209;) agar tidak turun baris setelah tanda strip
-          .replace(/(\w)[-–](\w)/g, "$1&#8209;$2");
-
         return (
           <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-10 overflow-hidden">
             <div
-              className="prose max-w-none text-sm md:text-base leading-relaxed text-slate-700 
+              ref={contentRef}
+              className="quill-content prose max-w-none text-sm md:text-base leading-relaxed text-slate-700
                         break-normal whitespace-normal [word-break:normal] [wrap-break-word]
                         [&_p]:mb-4 [&_p]:min-h-4 [&_p]:break-normal [&_p]:[word-break:normal]
                         [&_span]:break-normal [&_span]:[word-break:normal]
@@ -210,11 +221,8 @@ export default function DetailMateriPage() {
                         [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-3
                         [&_li]:mb-1
                         [&_img]:rounded-xl [&_img]:my-4 [&_img]:max-h-112.5 [&_img]:w-auto [&_img]:object-cover
-                        [&_blockquote]:border-l-4 [&_blockquote]:border-orange-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-slate-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg
-                        [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
-                        [&_th]:border [&_th]:border-slate-300 [&_th]:p-2.5 [&_th]:text-left
-                        [&_td]:border [&_td]:border-slate-300 [&_td]:p-2.5"
-              dangerouslySetInnerHTML={{ __html: cleanedHtml }}
+                        [&_blockquote]:border-l-4 [&_blockquote]:border-orange-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-slate-50 [&_blockquote]:py-2 [&_blockquote]:rounded-r-lg"
+              dangerouslySetInnerHTML={{ __html: material.content_text || "" }}
             />
           </div>
         );

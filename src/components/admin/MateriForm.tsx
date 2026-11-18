@@ -118,10 +118,25 @@ export default function MateriForm({ bipaLevelData, initialData }: MateriFormPro
     () => ({
       toolbar: {
         container: [
+          // Heading & Font Size
           [{ header: [1, 2, 3, false] }],
+          [{ size: ["small", false, "large", "huge"] }], // <-- Tambahkan opsi Font Size
+
+          // Formatting Dasar
           ["bold", "italic", "underline", "strike"],
+
+          // Font Color & Text Highlight (Background Color)
+          [{ color: [] }, { background: [] }],
+
+          // Text Alignment (Left, Center, Right, Justify)
+          [{ align: [] }],
+
+          // List & Indentasi
           [{ list: "ordered" }, { list: "bullet" }],
-          ["link", "image", "video"],
+          [{ indent: "-1" }, { indent: "+1" }],
+
+          // Blockquote, Link, Gambar, & Bersihkan Format
+          ["blockquote", "link", "image"],
           ["clean"],
         ],
         handlers: {
@@ -131,6 +146,24 @@ export default function MateriForm({ bipaLevelData, initialData }: MateriFormPro
     }),
     []
   );
+
+  // Daftarkan semua format secara eksplisit agar tidak di-strip oleh react-quill-new
+  const formats = [
+    "header",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "color",
+    "background",
+    "align",
+    "list",
+    "indent",
+    "blockquote",
+    "link",
+    "image",
+  ];
 
   // Generate slug materi
   const generateSlug = (title: string) => {
@@ -301,8 +334,9 @@ export default function MateriForm({ bipaLevelData, initialData }: MateriFormPro
               forwardedRef={quillRef}
               theme="snow"
               value={contentText}
-              onChange={setContentText}
+              onChange={(content: string) => setContentText(content)}
               modules={modules}
+              formats={formats}
               className="min-h-62.5"
             />
           </div>
