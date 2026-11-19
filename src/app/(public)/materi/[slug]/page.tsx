@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 
 // Definisi tipe data untuk detail materi
 interface MaterialDetail {
@@ -292,12 +293,14 @@ export default function DetailMateriPage() {
                   Uji kemampuan Bahasa Indonesia-mu lewat kuis di akhir bab.
                 </p>
               </div>
-              <button
-                onClick={() => window.open(`/materi/${material.slug}/kuis`, "_blank", "noopener,noreferrer")}
-                className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer"
+              <Link
+                href={`/materi/${material.slug}/kuis`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer"
               >
                 Mulai Kuis &rarr;
-              </button>
+              </Link>
             </div>
           )}
         </>
