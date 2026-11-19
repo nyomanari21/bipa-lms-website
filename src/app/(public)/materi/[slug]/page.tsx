@@ -293,7 +293,7 @@ export default function DetailMateriPage() {
                 </p>
               </div>
               <button
-                onClick={() => router.push(`/materi/${material.slug}/kuis`)}
+                onClick={() => window.open(`/materi/${material.slug}/kuis`, "_blank", "noopener,noreferrer")}
                 className="bg-orange-500 text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/10 whitespace-nowrap cursor-pointer"
               >
                 Mulai Kuis &rarr;

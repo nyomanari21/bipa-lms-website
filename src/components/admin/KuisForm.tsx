@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -36,12 +36,16 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
   );
   const [questionNumber, setQuestionNumber] = useState(initialData?.question_number || 1);
 
-  // State Khusus Multiple Choice (4 Opsi)
-  const [mcOptions, setMcOptions] = useState<string[]>(
-    initialData?.options && initialData.options.length === 4
-      ? initialData.options.map((opt) => opt.replace(/^[A-D]\.\s*/, "")) // Bersihkan prefix 'A. ' jika ada
-      : ["", "", "", ""]
-  );
+  // State Multiple Choice (Fleksibel hingga 5 Opsi: A - E)
+  const [mcOptions, setMcOptions] = useState<string[]>(() => {
+    if (initialData?.options && initialData.options.length > 0) {
+      const cleaned = initialData.options.map((opt) => opt.replace(/^[A-E]\.\s*/, ""));
+      // Lengkapi array menjadi tepat 5 elemen untuk tampilan input form
+      return Array.from({ length: 5 }, (_, i) => cleaned[i] || "");
+    }
+    return ["", "", "", "", ""];
+  });
+
   const [selectedCorrectMc, setSelectedCorrectMc] = useState<string>(
     initialData?.question_type === "multiple_choice" ? initialData.correct_answer || "0" : "0"
   );
@@ -53,7 +57,7 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle Perubahan Opsi A, B, C, D
+  // Handle Perubahan Opsi A, B, C, D, E
   const handleOptionChange = (index: number, value: string) => {
     const updated = [...mcOptions];
     updated[index] = value;
@@ -71,10 +75,31 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
 
       // Olah data berdasarkan tipe soal
       if (questionType === "multiple_choice") {
-        // Format opsi jadi: ["A. Jahe", "B. Kunyit", "C. Kencur", "D. Lengkuas"]
-        const labels = ["A", "B", "C", "D"];
-        finalOptions = mcOptions.map((opt, i) => `${labels[i]}. ${opt.trim()}`);
-        finalCorrectAnswer = selectedCorrectMc; // Menyimpan indeks berupa string ("0", "1", "2", atau "3")
+        const labels = ["A", "B", "C", "D", "E"];
+        const selectedIndex = Number(selectedCorrectMc);
+
+        // Pastikan opsi yang dipilih sebagai kunci jawaban tidak kosong
+        if (!mcOptions[selectedIndex] || mcOptions[selectedIndex].trim() === "") {
+          throw new Error(
+            `Opsi ${labels[selectedIndex]} yang dipilih sebagai kunci jawaban tidak boleh kosong!`
+          );
+        }
+
+        // Filter hanya opsi yang diisi dan lacak ulang indeks kunci jawabannya
+        const filledItems = mcOptions
+          .map((opt, idx) => ({ text: opt.trim(), originalIdx: idx }))
+          .filter((item) => item.text !== "");
+
+        if (filledItems.length < 2) {
+          throw new Error("Soal pilihan ganda minimal harus memiliki 2 opsi jawaban yang diisi.");
+        }
+
+        const newCorrectIndex = filledItems.findIndex(
+          (item) => item.originalIdx === selectedIndex
+        );
+
+        finalOptions = filledItems.map((item, i) => `${labels[i]}. ${item.text}`);
+        finalCorrectAnswer = newCorrectIndex.toString(); // Menyimpan indeks valid ("0" s/d "4")
       } else if (questionType === "short_answer") {
         finalOptions = null;
         finalCorrectAnswer = shortAnswerKey.trim();
@@ -196,15 +221,20 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
           />
         </div>
 
-        {/* PILIHAN GANDA*/}
+        {/* PILIHAN GANDA (2 - 5 OPSI) */}
         {questionType === "multiple_choice" && (
           <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-2xl space-y-3">
-            <label className="block text-xs font-bold uppercase text-orange-800">
-              Opsi Jawaban & Kunci Jawaban
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold uppercase text-orange-800">
+                Opsi Jawaban & Kunci Jawaban (2–5 Opsi)
+              </label>
+              <span className="text-[11px] font-medium text-orange-700">
+                Opsi C, D, E boleh dikosongkan
+              </span>
+            </div>
             
             <div className="space-y-2">
-              {["A", "B", "C", "D"].map((label, idx) => (
+              {["A", "B", "C", "D", "E"].map((label, idx) => (
                 <div key={label} className="flex items-center gap-3">
                   <input
                     type="radio"
@@ -220,20 +250,24 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
                     type="text"
                     value={mcOptions[idx]}
                     onChange={(e) => handleOptionChange(idx, e.target.value)}
-                    placeholder={`Isi opsi ${label}`}
-                    required={questionType === "multiple_choice"}
+                    placeholder={
+                      idx < 2
+                        ? `Isi opsi ${label} (Wajib)`
+                        : `Isi opsi ${label} (Opsional)`
+                    }
+                    required={questionType === "multiple_choice" && idx < 2}
                     className="w-full p-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
               ))}
             </div>
             <p className="text-[11px] text-orange-600 italic">
-              *Pilih radio button di sebelah kiri opsi yang merupakan <b>kunci jawaban benar</b>.
+              *Pilih radio button di sebelah kiri opsi yang merupakan <b>kunci jawaban benar</b>. Kosongkan opsi C–E jika membuat soal 2 pilihan (Benar/Salah) atau 4 pilihan.
             </p>
           </div>
         )}
 
-        {/* ISIAN SINGKAT*/}
+        {/* ISIAN SINGKAT */}
         {questionType === "short_answer" && (
           <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-2xl">
             <label className="block text-xs font-bold uppercase text-blue-800 mb-1">
@@ -253,7 +287,7 @@ export default function KuisForm({ quizzes, initialData }: QuestionFormProps) {
           </div>
         )}
 
-        {/* ESAI & SPEAKING*/}
+        {/* ESAI & SPEAKING */}
         {(questionType === "essay" || questionType === "speaking") && (
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
             <p className="text-xs font-semibold text-slate-600">

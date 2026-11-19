@@ -32,8 +32,8 @@ export default function ImportExcelModal({
   const handleDownloadTemplate = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Template Soal");
-  
-    // Header
+
+    // Header (Mendukung opsi A sampai E)
     const headers = [
       "question_text",
       "question_type",
@@ -41,15 +41,16 @@ export default function ImportExcelModal({
       "option_b",
       "option_c",
       "option_d",
+      "option_e",
       "correct_answer",
       "order_index",
     ];
     worksheet.addRow(headers);
-  
+
     // Header excel bold
     worksheet.getRow(1).font = { bold: true };
-  
-    // Contoh baris data untuk dosen
+
+    // Contoh baris data untuk dosen (5 opsi, 2 opsi Benar/Salah, Isian, Esai, Speaking)
     const templateData = [
       [
         "Rempah khusus apa yang memberikan aroma wangi khas pada masakan Seblak?",
@@ -58,8 +59,20 @@ export default function ImportExcelModal({
         "Kunyit",
         "Kencur",
         "Lengkuas",
+        "Temulawak",
         "C",
         1,
+      ],
+      [
+        "Kopi Kanyaah tutup pada hari Minggu sehingga rombongan perlu mencari alternatif.",
+        "multiple_choice",
+        "Benar",
+        "Salah",
+        "",
+        "",
+        "",
+        "A",
+        2,
       ],
       [
         "Sebutkan bahan utama seblak yang memiliki tekstur kenyal setelah direbus!",
@@ -68,8 +81,9 @@ export default function ImportExcelModal({
         "",
         "",
         "",
+        "",
         "Kerupuk",
-        2,
+        3,
       ],
       [
         "Ceritakan pengalaman Anda saat memesan makanan pedas di Bandung!",
@@ -79,7 +93,8 @@ export default function ImportExcelModal({
         "",
         "",
         "",
-        3,
+        "",
+        4,
       ],
       [
         "Bacalah kalimat ini: 'Bu, saya pesan seblak satu porsi.'",
@@ -89,11 +104,12 @@ export default function ImportExcelModal({
         "",
         "",
         "",
-        4,
+        "",
+        5,
       ],
     ];
     templateData.forEach((row) => worksheet.addRow(row));
-  
+
     // Dropdown data validation untuk kolom B (question_type), baris 2-100
     for (let i = 2; i <= 100; i++) {
       worksheet.getCell(`B${i}`).dataValidation = {
@@ -105,12 +121,12 @@ export default function ImportExcelModal({
         error: "Silakan pilih tipe soal yang tersedia dari daftar dropdown!",
       };
     }
-  
-    // Auto width kolom (opsional)
+
+    // Auto width kolom
     worksheet.columns.forEach((col) => {
       col.width = 25;
     });
-  
+
     // Generate buffer & trigger download di browser
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
@@ -129,31 +145,31 @@ export default function ImportExcelModal({
     const arrayBuffer = await file.arrayBuffer();
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(arrayBuffer);
-  
+
     const worksheet = workbook.worksheets[0];
     if (!worksheet) return [];
-  
+
     // Ambil header dari baris pertama
     const headerRow = worksheet.getRow(1);
     const headers: string[] = [];
     headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
       headers[colNumber] = cell.value?.toString().trim() || "";
     });
-  
+
     const rows: Record<string, any>[] = [];
-  
+
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return; // skip header
-  
+
       const rowData: Record<string, any> = {};
       let isEmpty = true;
-  
+
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
         const key = headers[colNumber];
         if (!key) return;
-  
+
         let value: any = cell.value;
-  
+
         // Handle hasil formula (object dengan property `result`)
         if (value && typeof value === "object" && "result" in value) {
           value = value.result;
@@ -162,26 +178,26 @@ export default function ImportExcelModal({
         else if (value && typeof value === "object" && "richText" in value) {
           value = value.richText.map((rt: any) => rt.text).join("");
         }
-        // Handle date object dari ExcelJS (opsional, jaga-jaga)
+        // Handle date object dari ExcelJS
         else if (value instanceof Date) {
           value = value.toISOString();
         }
-  
+
         if (value !== null && value !== undefined && value !== "") {
           isEmpty = false;
         }
-  
+
         rowData[key] = value ?? "";
       });
-  
+
       if (!isEmpty) {
         rows.push(rowData);
       }
     });
-  
+
     return rows;
   }
- 
+
   // Handle upload & parse data Excel ke Supabase
   const handleImport = async () => {
     if (!file) {
@@ -192,48 +208,84 @@ export default function ImportExcelModal({
       alert("Pilih kuis tujuan terlebih dahulu!");
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       const rawRows = await parseExcelFile(file);
-  
+
       if (rawRows.length === 0) {
         throw new Error("File Excel kosong atau format tidak sesuai.");
       }
-  
+
       // Formatting setiap baris agar sesuai dengan skema tabel questions
       const formattedQuestions = rawRows.map((row, index) => {
+        const rowNum = index + 2; // Nomor baris asli di Excel (baris 1 = header)
         const type = (row.question_type || "multiple_choice").toString().trim().toLowerCase();
-  
+
         let options: string[] | null = null;
         let correctAnswer: string | null = null;
-  
+
         if (type === "multiple_choice") {
-          // Susun array opsi A-D
-          options = [
-            `A. ${(row.option_a || "").toString().trim()}`,
-            `B. ${(row.option_b || "").toString().trim()}`,
-            `C. ${(row.option_c || "").toString().trim()}`,
-            `D. ${(row.option_d || "").toString().trim()}`,
+          const labels = ["A", "B", "C", "D", "E"];
+          const rawOptionTexts = [
+            (row.option_a ?? "").toString().trim(),
+            (row.option_b ?? "").toString().trim(),
+            (row.option_c ?? "").toString().trim(),
+            (row.option_d ?? "").toString().trim(),
+            (row.option_e ?? "").toString().trim(),
           ];
-  
-          // Mapping jawaban benar (A->0, B->1, C->2, D->3 atau angka 1->0, 2->1, dst)
-          const rawAns = (row.correct_answer || "").toString().trim().toUpperCase();
-          if (["A", "1"].includes(rawAns)) correctAnswer = "0";
-          else if (["B", "2"].includes(rawAns)) correctAnswer = "1";
-          else if (["C", "3"].includes(rawAns)) correctAnswer = "2";
-          else if (["D", "4"].includes(rawAns)) correctAnswer = "3";
-          else correctAnswer = "0"; // Fallback ke A jika tidak valid
+
+          // Ambil hanya opsi yang terisi teksnya dan simpan indeks aslinya
+          const filledItems = rawOptionTexts
+            .map((text, idx) => ({ text, originalIdx: idx }))
+            .filter((item) => item.text !== "");
+
+          if (filledItems.length < 2) {
+            throw new Error(
+              `Baris Excel ke-${rowNum}: Soal pilihan ganda minimal harus memiliki 2 opsi terisi.`
+            );
+          }
+
+          // Mapping kunci jawaban dari Excel (A-E atau 1-5) ke indeks awal (0-4)
+          const rawAns = (row.correct_answer ?? "").toString().trim().toUpperCase();
+          const answerMap: Record<string, number> = {
+            A: 0, "1": 0,
+            B: 1, "2": 1,
+            C: 2, "3": 2,
+            D: 3, "4": 3,
+            E: 4, "5": 4,
+          };
+
+          const originalCorrectIdx = answerMap[rawAns];
+          if (originalCorrectIdx === undefined) {
+            throw new Error(
+              `Baris Excel ke-${rowNum}: Kunci jawaban '${rawAns}' tidak valid (gunakan A, B, C, D, atau E).`
+            );
+          }
+
+          // Cari posisi indeks baru setelah opsi kosong di-filter
+          const newCorrectIdx = filledItems.findIndex(
+            (item) => item.originalIdx === originalCorrectIdx
+          );
+
+          if (newCorrectIdx === -1) {
+            throw new Error(
+              `Baris Excel ke-${rowNum}: Opsi '${rawAns}' yang dipilih sebagai kunci jawaban ternyata kosong.`
+            );
+          }
+
+          options = filledItems.map((item, i) => `${labels[i]}. ${item.text}`);
+          correctAnswer = newCorrectIdx.toString();
         } else if (type === "short_answer") {
           options = null;
-          correctAnswer = (row.correct_answer || "").toString().trim();
+          correctAnswer = (row.correct_answer ?? "").toString().trim();
         } else {
           // Essay & Speaking
           options = null;
           correctAnswer = null;
         }
-  
+
         return {
           quiz_id: selectedQuizId,
           question_text: row.question_text || `Pertanyaan ${index + 1}`,
@@ -243,14 +295,14 @@ export default function ImportExcelModal({
           question_number: row.order_index ? Number(row.order_index) : index + 1,
         };
       });
-  
+
       // Bulk insert ke Supabase
       const { error } = await supabase
         .from("questions")
         .insert(formattedQuestions);
-  
+
       if (error) throw error;
-  
+
       alert(`Berhasil mengimpor ${formattedQuestions.length} soal kuis!`);
       onSuccess();
       onClose();
