@@ -124,9 +124,16 @@ function AuthForm() {
       </div>
 
       <div className="text-center space-y-1.5 pt-1">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          {isRegister ? "Buat Akun Baru" : "Wilujeng Sumping!"}
-        </h1>
+        {isRegister ? (
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            Buat Akun Baru
+          </h1>
+        ) : (
+          <div>
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Selamat Datang!</p>
+            <p className="text-xl font-medium text-slate-600">Welcome!</p>
+          </div>
+        )}
         <p className="text-xs sm:text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
           {isRegister
             ? "Daftar untuk mulai belajar bahasa & gastronomi Sunda"

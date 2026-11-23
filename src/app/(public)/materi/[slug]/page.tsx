@@ -213,11 +213,11 @@ export default function DetailMateriPage() {
               ref={contentRef}
               className="quill-content prose max-w-none text-sm md:text-base leading-relaxed text-slate-700
                         break-normal whitespace-normal [word-break:normal] [wrap-break-word]
-                        [&_p]:mb-4 [&_p]:min-h-4 [&_p]:break-normal [&_p]:[word-break:normal]
+                        [&_p]:text-lg [&_p]:mb-4 [&_p]:min-h-4 [&_p]:break-normal [&_p]:[word-break:normal]
                         [&_span]:break-normal [&_span]:[word-break:normal]
-                        [&_h1]:text-2xl [&_h1]:font-extrabold [&_h1]:text-slate-900 [&_h1]:mt-6 [&_h1]:mb-3
-                        [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h2]:mb-2.5
-                        [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2
+                        [&_h1]:text-3xl [&_h1]:font-extrabold [&_h1]:text-slate-900 [&_h1]:mt-6 [&_h1]:mb-3
+                        [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h2]:mb-2.5
+                        [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-slate-900 [&_h3]:mt-4 [&_h3]:mb-2
                         [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-3
                         [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-3
                         [&_li]:mb-1

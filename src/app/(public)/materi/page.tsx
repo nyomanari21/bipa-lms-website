@@ -15,6 +15,7 @@ interface Material {
   id: string;
   title: string;
   slug: string;
+  order_index: number;
   bipa_level_id: number;
 }
 
@@ -55,7 +56,7 @@ export default function MateriPage() {
       setLoadingMaterials(true);
       const { data: materialData, error: materialError } = await supabase
         .from("materials")
-        .select("id, title, slug, bipa_level_id")
+        .select("id, title, slug, order_index, bipa_level_id")
         .eq("bipa_level_id", selectedLevel)
         .order("order_index", { ascending: true });
 
@@ -97,7 +98,7 @@ export default function MateriPage() {
             <span>Katalog Pembelajaran BIPA RAGA</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight uppercase">
             Materi Pembelajaran
           </h1>
 
@@ -134,7 +135,7 @@ export default function MateriPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between w-full">
-                    <span className={`text-xs font-extrabold uppercase tracking-wider ${
+                    <span className={`text-lg font-extrabold uppercase tracking-wider ${
                       isSelected ? "text-orange-600" : "text-slate-500"
                     }`}>
                       {lvl.level_name}
@@ -146,8 +147,7 @@ export default function MateriPage() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800">{lvl.level_name}</h3>
-                    <p className="text-xs text-slate-500 line-clamp-1">{lvl.theme}</p>
+                    <p className="text-xs text-slate-600 line-clamp-1">{lvl.theme}</p>
                   </div>
                 </button>
               );

@@ -7,6 +7,7 @@ interface MaterialProps {
   id: string;
   title: string;
   slug: string;
+  order_index: number;
   bipa_level_id: number;
 }
 
@@ -43,8 +44,8 @@ export default function MateriCard({ material }: MaterialCardProps) {
 
         {/* Judul & Deskripsi */}
         <div className="space-y-1.5">
-          <h3 className="font-extrabold text-base sm:text-lg text-slate-900 group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
-            {material.title}
+          <h3 className="uppercase font-extrabold text-base sm:text-lg text-slate-900 group-hover:text-orange-600 transition-colors leading-snug">
+            Unit {material.order_index}: {material.title}
           </h3>
         </div>
       </div>

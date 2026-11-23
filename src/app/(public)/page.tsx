@@ -115,7 +115,7 @@ export default function Home() {
 
                 <div>
                   <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-orange-600 transition">
-                    BIPA 1 (Tingkat Dasar)
+                    BIPA 3
                   </h3>
                   <p className="text-xs font-semibold text-orange-600 mt-1">
                     Tema: Wisata Gastronomi Bandung
@@ -132,7 +132,7 @@ export default function Home() {
                   href="/materi"
                   className="block text-center w-full py-2.5 bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white rounded-xl text-xs font-bold transition"
                 >
-                  Buka Modul BIPA 1 →
+                  Buka Modul BIPA 3 →
                 </Link>
               </div>
             </div>
