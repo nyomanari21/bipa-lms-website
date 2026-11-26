@@ -28,6 +28,16 @@ function AuthForm() {
     }
   }, [searchParams]);
 
+  // Cek apakah browser memblokir cookie (terutama di Safari iOS)
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && !navigator.cookieEnabled) {
+      setMessage({
+        type: "error",
+        text: "Browser Anda memblokir cookie. Harap aktifkan cookie di pengaturan browser (Safari/Chrome) untuk dapat masuk.",
+      });
+    }
+  }, []);
+
   // Handler Submit Login / Register
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,12 +71,20 @@ function AuthForm() {
         
         // Cek role user yang login dan arahkan ke halaman sesuai role
         const { data: { user } } = await supabase.auth.getUser()
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('users')
           .select('role')
           .eq('id', user?.id)
           .single()
         
+        // Jika data profil tidak ditemukan
+        if (profileError || !profile) {
+          throw new Error("Data profil pengguna tidak ditemukan. Silakan hubungi admin.");
+        }
+
+        // Beri jeda singkat agar Safari iOS selesai menulis cookie sesi sebelum pindah halaman
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
         if (profile?.role === "student") {
           router.refresh();
           window.location.href = '/'; // Arahkan ke halaman beranda untuk siswa
