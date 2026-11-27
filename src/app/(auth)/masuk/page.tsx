@@ -14,6 +14,7 @@ function AuthForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -46,6 +47,11 @@ function AuthForm() {
 
     try {
       if (isRegister) {
+        // Validasi kecocokan kata sandi
+        if (password !== confirmPassword) {
+          throw new Error("Kata sandi dan konfirmasi kata sandi tidak sesuai.");
+        }
+
         // Daftar Akun
         const { error } = await supabase.auth.signUp({
           email,
@@ -59,7 +65,9 @@ function AuthForm() {
         });
 
         if (error) throw error;
-        setMessage({ type: "success", text: "Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi." });
+        setPassword("");
+        setConfirmPassword("");
+        setMessage({ type: "success", text: "Pendaftaran berhasil! Silakan masuk dengan akun yang sudah dibuat." });
       } else {
         // Masuk Akun
         const { error } = await supabase.auth.signInWithPassword({
@@ -217,6 +225,31 @@ function AuthForm() {
           />
         </div>
 
+        {isRegister && (
+          <div>
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+              Konfirmasi Kata Sandi
+            </label>
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Ulangi kata sandi"
+              className={`w-full p-3.5 rounded-2xl border bg-slate-50/60 text-sm font-medium focus:outline-none focus:bg-white focus:ring-2 transition ${
+                confirmPassword && password !== confirmPassword
+                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/10"
+                  : "border-slate-200 focus:border-orange-500 focus:ring-orange-500/10"
+              }`}
+            />
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-[11px] font-semibold text-rose-600 mt-1">
+                Kata sandi belum sesuai
+              </p>
+            )}
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={loading}
@@ -244,6 +277,7 @@ function AuthForm() {
           type="button"
           onClick={() => {
             setIsRegister(!isRegister);
+            setConfirmPassword("");
             setMessage(null);
           }}
           className="text-xs font-bold text-orange-600 hover:text-orange-700 transition cursor-pointer"
